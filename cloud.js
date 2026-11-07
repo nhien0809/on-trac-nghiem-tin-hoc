@@ -132,7 +132,11 @@
     ready: ready,
     user: function () { return state.user; },
     isReady: function () { return state.ready; },
-    onUser: function (fn) { listeners.push(fn); },
+    // Nếu Firebase đã báo trạng thái trước khi app.js đăng ký (SDK tải nhanh hơn app.js) thì gọi ngay.
+    onUser: function (fn) {
+      listeners.push(fn);
+      if (state.ready) setTimeout(function () { fn(state.user); }, 0);
+    },
     load: load, save: save, flush: flush,
     signInGoogle: signInGoogle, signInEmail: signInEmail, signUpEmail: signUpEmail,
     resetPassword: resetPassword, signOut: signOut, message: message
