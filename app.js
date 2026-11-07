@@ -144,6 +144,10 @@
     { file: 'Video5_Phuong_phap_va_Danh_gia.mp4', title: 'Phương pháp và đánh giá', week: '4', dur: 786 },
     { file: 'Video6_Phuong_phap_giao_duc_slide.mp4', title: 'Phương pháp giáo dục (bài giảng slide)', week: '4', dur: 495 }
   ];
+  // Video nặng (~160 MB) chỉ đặt trên GitHub Pages; bản trên Firebase Hosting tải video từ đó
+  // để không vượt hạn mức tải 360 MB/ngày của gói miễn phí.
+  var VIDEO_BASE = /(^|\.)github\.io$|^(localhost|127\.0\.0\.1)$/.test(location.hostname)
+    ? 'videos/' : 'https://nhien0809.github.io/on-trac-nghiem-tin-hoc/videos/';
   function fmtTime(s) {
     s = Math.max(0, Math.round(s));
     var m = Math.floor(s / 60), r = s % 60;
@@ -366,7 +370,7 @@
     return h('li', { class: 'vcard' + (st ? ' ' + st.cls : '') }, [
       h('a', { href: '#/video/' + n }, [
         h('div', { class: 'vcard__thumb' }, [
-          h('img', { src: 'videos/thumbs/v' + n + '.png', alt: '', loading: 'lazy', width: '640', height: '360' }),
+          h('img', { src: VIDEO_BASE + 'thumbs/v' + n + '.png', alt: '', loading: 'lazy', width: '640', height: '360' }),
           h('span', { class: 'vcard__play', 'aria-hidden': 'true', text: '▶' }),
           h('span', { class: 'vcard__dur', text: fmtTime(v.dur) })
         ]),
@@ -1061,7 +1065,7 @@
     var saved = store.video[n] || {};
     var video = h('video', {
       class: 'player__video', controls: true, preload: 'metadata', playsinline: true,
-      poster: 'videos/thumbs/v' + n + '.png', src: 'videos/' + v.file,
+      poster: VIDEO_BASE + 'thumbs/v' + n + '.png', src: VIDEO_BASE + v.file,
       'aria-label': 'Video ' + n + ': ' + v.title
     });
     var resume = null;
@@ -1116,7 +1120,7 @@
     var playlist = h('ol', { class: 'playlist' }, VIDEOS.map(function (x, i) {
       var st = videoState(i + 1);
       return h('li', null, [h('a', { href: '#/video/' + (i + 1), 'aria-current': i + 1 === n ? 'page' : null, class: st ? st.cls : null }, [
-        h('img', { src: 'videos/thumbs/v' + (i + 1) + '.png', alt: '', loading: 'lazy', width: '96', height: '54' }),
+        h('img', { src: VIDEO_BASE + 'thumbs/v' + (i + 1) + '.png', alt: '', loading: 'lazy', width: '96', height: '54' }),
         h('span', null, [h('b', { text: (i + 1) + '. ' + x.title }), h('small', { text: fmtTime(x.dur) + (st ? ' · ' + st.text : '') })])
       ])]);
     }));
