@@ -64,20 +64,53 @@
   DATA.weeks.forEach(function (w) { weekById[w.id] = w; });
   var TOTAL_TESTS = DATA.weeks.reduce(function (s, w) { return s + w.tests.length; }, 0);
 
-  // ---------- storage (per-viewer convenience only) ----------
-  function loadStore() {
-    try { return JSON.parse(localStorage.getItem(STORE_KEY)) || {}; } catch (e) { return {}; }
+  // ---------- storage ----------
+  // Khách: localStorage[STORE_KEY]. Đã đăng nhập: Firestore users/{uid}, kèm bản sao trên máy
+  // (localStorage[STORE_KEY + ':u:' + uid]) để mở trang là thấy ngay.
+  var Cloud = window.Cloud && window.Cloud.enabled ? window.Cloud : null;
+  var LAST_UID_KEY = 'ontn-last-uid';
+  function lsGet(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }
+  function lsSet(k, v) { try { if (v === null) localStorage.removeItem(k); else localStorage.setItem(k, v); } catch (e) { /* ignore */ } }
+  function keyFor(uid) { return uid ? STORE_KEY + ':u:' + uid : STORE_KEY; }
+  function normalize(s) {
+    s = s && typeof s === 'object' ? s : {};
+    s.best = s.best || {};
+    s.prefs = s.prefs || { mode: 'practice', shuffleQ: false, shuffleO: true };
+    s.wrong = s.wrong || {};     // question id -> { n: số lần sai, t: lần cuối }
+    s.video = s.video || {};     // số video -> { t: vị trí (giây), done: đã xem hết }
+    s.history = s.history || []; // [{ t, title, c, n, mode }]
+    Object.keys(s.wrong).forEach(function (id) { if (!byId[id]) delete s.wrong[id]; });
+    return s;
   }
-  function saveStore(s) {
-    try { localStorage.setItem(STORE_KEY, JSON.stringify(s)); } catch (e) { /* ignore */ }
+  function readLocal(uid) {
+    try { return normalize(JSON.parse(lsGet(keyFor(uid)))); } catch (e) { return normalize(null); }
   }
-  var store = loadStore();
-  store.best = store.best || {};
-  store.prefs = store.prefs || { mode: 'practice', shuffleQ: false, shuffleO: true };
-  store.wrong = store.wrong || {};   // question id -> { n: times wrong, t: last time }
-  store.video = store.video || {};   // video number -> { t: position (s), done: bool }
-  // drop ids that no longer exist in the data
-  Object.keys(store.wrong).forEach(function (id) { if (!byId[id]) delete store.wrong[id]; });
+  function hasProgress(s) {
+    return Object.keys(s.best).length || Object.keys(s.wrong).length || Object.keys(s.video).length || s.history.length;
+  }
+  var currentUid = Cloud ? lsGet(LAST_UID_KEY) : null;
+  var store = readLocal(currentUid);
+  function saveStore(s, urgent) {
+    lsSet(keyFor(currentUid), JSON.stringify(s));
+    if (Cloud && currentUid) Cloud.save(currentUid, s, urgent);
+  }
+  // Gộp tiến độ khách vào tài khoản (lấy kết quả tốt hơn, hợp danh sách câu sai…)
+  function mergeInto(acc, g) {
+    Object.keys(g.best).forEach(function (k) {
+      var a = acc.best[k], b = g.best[k];
+      if (!a || b.correct / b.total > a.correct / a.total) acc.best[k] = b;
+    });
+    Object.keys(g.wrong).forEach(function (id) {
+      var a = acc.wrong[id], b = g.wrong[id];
+      acc.wrong[id] = a ? { n: Math.max(a.n, b.n), t: Math.max(a.t, b.t) } : b;
+    });
+    Object.keys(g.video).forEach(function (n) {
+      var a = acc.video[n] || {}, b = g.video[n];
+      acc.video[n] = { t: Math.max(a.t || 0, b.t || 0), done: !!(a.done || b.done) };
+    });
+    acc.history = acc.history.concat(g.history).sort(function (x, y) { return y.t - x.t; }).slice(0, 300);
+    return acc;
+  }
 
   // Ghi nhận một câu trả lời: sai -> thêm vào sổ câu sai; đúng -> gỡ khỏi sổ (đã thuộc).
   function recordAnswer(q, chosen) {
@@ -224,7 +257,10 @@
         h('div', { class: 'stat' }, [h('b', { 'data-count': String(DATA.meta.groups), text: String(DATA.meta.groups) }), h('span', { text: 'nhóm đóng góp' })]),
         h('div', { class: 'stat' }, [h('b', { 'data-count': String(TOTAL_TESTS), text: String(TOTAL_TESTS) }), h('span', { text: 'đề theo tuần' })]),
         h('div', { class: 'stat stat--wide' }, [
-          h('span', { text: 'Tiến độ của bạn: ' + done + '/' + TOTAL_TESTS + ' đề đã làm' }),
+          h('div', { class: 'stat__row' }, [
+            h('span', { text: 'Tiến độ' + (Cloud && Cloud.user() ? ' của ' + (Cloud.user().name || 'bạn') : ' của bạn') + ': ' + done + '/' + TOTAL_TESTS + ' đề đã làm' }),
+            h('a', { href: '#/history', text: 'Lịch sử →' })
+          ]),
           h('div', { class: 'meter', role: 'progressbar', 'aria-label': 'Số đề đã làm', 'aria-valuemin': '0', 'aria-valuemax': String(TOTAL_TESTS), 'aria-valuenow': String(done) }, [
             h('span', { style: 'transform:scaleX(' + frac + ')' })
           ])
@@ -685,7 +721,9 @@
         store.best[quiz.set.key] = { correct: correct, total: quiz.items.length };
       }
     }
-    saveStore(store);
+    store.history.unshift({ t: Date.now(), title: quiz.set.title, c: correct, n: quiz.items.length, mode: quiz.prefs.mode });
+    if (store.history.length > 300) store.history.length = 300;
+    saveStore(store, true);
     location.hash = '#/result';
   }
 
@@ -1124,6 +1162,290 @@
     });
   }
 
+  // ---------- đăng nhập ----------
+  var afterLogin = '#/';
+  var cloudFailed = false;
+  function pageLogin() {
+    setTitle('Đăng nhập'); setNav('');
+    if (!Cloud) {
+      render([h('h1', { text: 'Đăng nhập' }), h('p', { class: 'muted', text: 'Chức năng đăng nhập chưa được bật cho trang này.' })]);
+      return;
+    }
+    if (cloudFailed) {
+      render([h('div', { class: 'auth-card panel' }, [
+        h('h1', { text: 'Chưa đăng nhập được' }),
+        h('p', { class: 'muted', text: 'Không tải được chức năng đăng nhập (mạng chặn hoặc mất kết nối). Bạn vẫn làm bài bình thường — tiến độ được lưu trên trình duyệt này. Thử tải lại trang sau nhé.' }),
+        h('div', { class: 'actions' }, [h('button', { type: 'button', class: 'btn btn--primary', onclick: function () { location.reload(); }, text: 'Tải lại trang' }), h('a', { class: 'btn', href: '#/', text: 'Về trang chủ' })])
+      ])]);
+      return;
+    }
+    if (!Cloud.isReady()) {
+      render([h('div', { class: 'auth-card panel' }, [h('p', { class: 'muted', style: 'margin:0', text: 'Đang tải chức năng đăng nhập…' })])]);
+      return;
+    }
+    var u = Cloud.user();
+    if (u) {
+      render([
+        h('div', { class: 'auth-card panel panel--accent' }, [
+          h('div', { class: 'auth-who' }, [avatarEl(u, 'avatar--lg'), h('div', null, [h('b', { text: u.name || 'Tài khoản của bạn' }), h('small', { class: 'muted', text: u.email })])]),
+          h('p', { class: 'muted', text: 'Tiến độ, câu sai, lịch sử làm bài và vị trí xem video đang được lưu vào tài khoản này. Đăng nhập trên máy khác là thấy lại.' }),
+          h('div', { class: 'actions' }, [
+            h('a', { class: 'btn btn--primary', href: '#/', text: 'Về trang ôn tập' }),
+            h('a', { class: 'btn', href: '#/history', text: 'Lịch sử làm bài' }),
+            h('button', { type: 'button', class: 'btn btn--ghost', onclick: doSignOut, text: 'Đăng xuất' })
+          ])
+        ])
+      ]);
+      return;
+    }
+
+    var mode = 'in';
+    var err = h('p', { class: 'auth-error', role: 'alert' });
+    var info = h('p', { class: 'auth-info', role: 'status' });
+    var nameIn = h('input', { type: 'text', id: 'au-name', autocomplete: 'name', maxlength: '60' });
+    var emailIn = h('input', { type: 'email', id: 'au-email', autocomplete: 'email', inputmode: 'email', required: true });
+    var pwIn = h('input', { type: 'password', id: 'au-pw', autocomplete: 'current-password', minlength: '6', required: true });
+    var nameRow = h('div', { class: 'field', hidden: true }, [h('label', { for: 'au-name', text: 'Tên hiển thị' }), nameIn]);
+    var submitBtn = h('button', { type: 'submit', class: 'btn btn--primary btn--block' });
+    var forgot = h('button', { type: 'button', class: 'linkish', text: 'Quên mật khẩu?' });
+    var tabIn = h('button', { type: 'button', role: 'tab', class: 'chip', text: 'Đăng nhập' });
+    var tabUp = h('button', { type: 'button', role: 'tab', class: 'chip', text: 'Tạo tài khoản' });
+
+    function setMode(m) {
+      mode = m;
+      tabIn.setAttribute('aria-selected', m === 'in' ? 'true' : 'false');
+      tabUp.setAttribute('aria-selected', m === 'up' ? 'true' : 'false');
+      nameRow.hidden = m !== 'up';
+      pwIn.setAttribute('autocomplete', m === 'up' ? 'new-password' : 'current-password');
+      submitBtn.textContent = m === 'up' ? 'Tạo tài khoản' : 'Đăng nhập';
+      forgot.hidden = m === 'up';
+      err.textContent = ''; info.textContent = '';
+    }
+    tabIn.addEventListener('click', function () { setMode('in'); });
+    tabUp.addEventListener('click', function () { setMode('up'); });
+
+    function busy(on, label) {
+      submitBtn.disabled = on; gBtn.disabled = on;
+      if (on) submitBtn.textContent = label || 'Đang xử lý…'; else setMode(mode);
+    }
+    function done() { location.hash = afterLogin || '#/'; afterLogin = '#/'; }
+    function fail(e) { busy(false); err.textContent = Cloud.message(e); }
+
+    var form = h('form', { class: 'auth-form', novalidate: true }, [
+      nameRow,
+      h('div', { class: 'field' }, [h('label', { for: 'au-email', text: 'Email' }), emailIn]),
+      h('div', { class: 'field' }, [h('label', { for: 'au-pw', text: 'Mật khẩu' }), pwIn, h('small', { class: 'muted', text: 'Ít nhất 6 ký tự.' })]),
+      err, info,
+      submitBtn,
+      forgot
+    ]);
+    form.addEventListener('submit', function (e) {
+      e.preventDefault();
+      err.textContent = ''; info.textContent = '';
+      var email = emailIn.value.trim(), pw = pwIn.value;
+      if (mode === 'up' && !nameIn.value.trim()) { err.textContent = 'Hãy nhập tên hiển thị.'; nameIn.focus(); return; }
+      if (!email) { err.textContent = 'Hãy nhập email.'; emailIn.focus(); return; }
+      if (pw.length < 6) { err.textContent = 'Mật khẩu cần ít nhất 6 ký tự.'; pwIn.focus(); return; }
+      busy(true);
+      (mode === 'up' ? Cloud.signUpEmail(nameIn.value.trim(), email, pw) : Cloud.signInEmail(email, pw)).then(done, fail);
+    });
+    forgot.addEventListener('click', function () {
+      err.textContent = ''; info.textContent = '';
+      var email = emailIn.value.trim();
+      if (!email) { err.textContent = 'Nhập email ở trên rồi bấm “Quên mật khẩu?” để nhận thư đặt lại mật khẩu.'; emailIn.focus(); return; }
+      Cloud.resetPassword(email).then(function () {
+        info.textContent = 'Đã gửi thư đặt lại mật khẩu tới ' + email + ' (xem cả mục Spam).';
+      }, function (e) { err.textContent = Cloud.message(e); });
+    });
+
+    var gBtn = h('button', { type: 'button', class: 'btn btn--google btn--block', onclick: function () {
+      err.textContent = '';
+      busy(true, 'Đang mở Google…');
+      Cloud.signInGoogle().then(function (r) { if (r !== undefined) done(); }, fail);
+    } }, [h('span', { class: 'g-logo', 'aria-hidden': 'true', html: GOOGLE_SVG }), 'Tiếp tục với Google']);
+
+    setMode('in');
+    render([
+      h('div', { class: 'auth-card panel' }, [
+        h('span', { class: 'eyebrow', text: '✿ Lưu tiến độ của riêng bạn' }),
+        h('h1', { text: 'Đăng nhập' }),
+        h('p', { class: 'muted', style: 'margin:0 0 18px', text: 'Đăng nhập để lưu điểm từng đề, câu sai, lịch sử làm bài và chỗ xem video — mở trên máy khác vẫn còn nguyên.' }),
+        gBtn,
+        h('div', { class: 'auth-or' }, [h('span', { text: 'hoặc dùng email' })]),
+        h('div', { class: 'auth-tabs filter-row', role: 'tablist' }, [tabIn, tabUp]),
+        form
+      ])
+    ]);
+    animate(function () {
+      G.from('.auth-card', { y: 20, autoAlpha: 0, duration: 0.5 });
+      G.from('.auth-card > *', { y: 10, autoAlpha: 0, stagger: 0.05, duration: 0.35, delay: 0.1 });
+    });
+  }
+  var GOOGLE_SVG = '<svg viewBox="0 0 48 48" width="18" height="18"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.7 29.2 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.2 7.9 3l5.7-5.7C34 6.1 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.4-.4-3.5z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.7 15.1 19 12 24 12c3.1 0 5.8 1.2 7.9 3l5.7-5.7C34 6.1 29.3 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2C29.2 35.1 26.7 36 24 36c-5.2 0-9.6-3.3-11.3-7.9l-6.5 5C9.5 39.6 16.2 44 24 44z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.2-2.2 4.2-4.1 5.6l6.2 5.2C37 39.2 44 34 44 24c0-1.3-.1-2.4-.4-3.5z"/></svg>';
+
+  function avatarEl(u, extra) {
+    var initial = ((u.name || u.email || '?').trim().charAt(0) || '?').toUpperCase();
+    if (u.photo) return h('img', { class: 'avatar ' + (extra || ''), src: u.photo, alt: '', referrerpolicy: 'no-referrer' });
+    return h('span', { class: 'avatar ' + (extra || ''), 'aria-hidden': 'true', text: initial });
+  }
+  function doSignOut() {
+    Cloud.signOut().then(function () { toast('Đã đăng xuất.'); location.hash = '#/'; });
+  }
+
+  // ---------- lịch sử ----------
+  function pageHistory() {
+    setTitle('Lịch sử làm bài'); setNav('');
+    var hs = store.history;
+    var sumC = hs.reduce(function (s, x) { return s + x.c; }, 0);
+    var sumN = hs.reduce(function (s, x) { return s + x.n; }, 0);
+    var testsDone = DATA.weeks.reduce(function (s, w) { return s + doneTests(w); }, 0);
+    var vidsDone = VIDEOS.filter(function (_, i) { return store.video[i + 1] && store.video[i + 1].done; }).length;
+    var u = Cloud && Cloud.user();
+    var fmt = function (t) {
+      var d = new Date(t);
+      var p = function (n) { return (n < 10 ? '0' : '') + n; };
+      return p(d.getHours()) + ':' + p(d.getMinutes()) + ' · ' + p(d.getDate()) + '/' + p(d.getMonth() + 1) + '/' + d.getFullYear();
+    };
+    var list = h('ol', { class: 'history' });
+    hs.forEach(function (x) {
+      var pct = Math.round(x.c / x.n * 100);
+      list.appendChild(h('li', { class: 'history-item' }, [
+        h('span', { class: 'pct ' + (pct >= 80 ? 'is-good' : pct >= 50 ? 'is-mid' : 'is-low'), text: pct + '%' }),
+        h('div', { class: 'history-item__main' }, [
+          h('b', { text: x.title }),
+          h('small', { class: 'muted', text: fmt(x.t) + ' · ' + (x.mode === 'exam' ? 'Thi thử' : 'Luyện tập') })
+        ]),
+        h('span', { class: 'history-item__score', text: x.c + '/' + x.n })
+      ]));
+    });
+    if (!hs.length) list.appendChild(h('li', { class: 'empty', text: 'Chưa có lần làm bài nào. Nộp bài xong là kết quả sẽ hiện ở đây.' }));
+
+    render([
+      h('span', { class: 'eyebrow', text: u ? '✿ ' + (u.name || u.email) : '✿ Trên trình duyệt này' }),
+      h('h1', { text: 'Lịch sử làm bài' }),
+      Cloud && !u ? h('div', { class: 'resume' }, [
+        h('span', { text: 'Bạn chưa đăng nhập — lịch sử chỉ lưu trên trình duyệt này.' }),
+        h('a', { class: 'btn btn--primary btn--sm', href: '#/login', onclick: function () { afterLogin = '#/history'; }, text: 'Đăng nhập để lưu' })
+      ]) : null,
+      h('div', { class: 'hstats' }, [
+        h('div', { class: 'stat' }, [h('b', { 'data-count': String(hs.length), text: String(hs.length) }), h('span', { text: 'lần nộp bài' })]),
+        h('div', { class: 'stat' }, [h('b', { text: sumN ? Math.round(sumC / sumN * 100) + '%' : '–' }), h('span', { text: 'tỉ lệ đúng (' + sumC + '/' + sumN + ' câu)' })]),
+        h('div', { class: 'stat' }, [h('b', { text: testsDone + '/' + TOTAL_TESTS }), h('span', { text: 'đề theo tuần đã làm' })]),
+        h('div', { class: 'stat' }, [h('b', { text: vidsDone + '/' + VIDEOS.length }), h('span', { text: 'video đã xem hết' })])
+      ]),
+      h('div', { class: 'section-head', style: 'margin-top:24px' }, [
+        h('h2', { text: 'Các lần làm bài' }),
+        hs.length ? h('button', { type: 'button', class: 'btn btn--ghost btn--sm', onclick: function () {
+          if (!window.confirm('Xoá toàn bộ ' + hs.length + ' dòng lịch sử làm bài? (Điểm cao nhất từng đề và câu sai vẫn giữ nguyên.)')) return;
+          store.history = []; saveStore(store, true); pageHistory();
+        }, text: 'Xoá lịch sử' }) : null
+      ]),
+      list
+    ]);
+    animate(function () {
+      G.from('.eyebrow, h1, .resume, .hstats .stat', { y: 14, autoAlpha: 0, stagger: 0.06 });
+    });
+    revealOnScroll(Array.prototype.slice.call(list.querySelectorAll('.history-item'), 0, 40));
+  }
+
+  // ---------- thông báo nhỏ ----------
+  var toastEl = null, toastTimer = null;
+  function toast(msg) {
+    if (!toastEl) { toastEl = h('div', { class: 'toast', role: 'status' }); document.body.appendChild(toastEl); }
+    toastEl.textContent = msg;
+    toastEl.classList.add('is-on');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () { toastEl.classList.remove('is-on'); }, 3200);
+  }
+
+  // ---------- tài khoản trên thanh trên cùng ----------
+  var accountBox = document.getElementById('account');
+  function drawAccount() {
+    if (!accountBox) return;
+    accountBox.innerHTML = '';
+    if (!Cloud || !Cloud.isReady()) return;
+    var u = Cloud.user();
+    if (!u) {
+      accountBox.appendChild(h('a', { class: 'btn btn--primary btn--sm', href: '#/login', onclick: function () {
+        if (!/^#\/login/.test(location.hash)) afterLogin = location.hash && !/^#\/(quiz|result)/.test(location.hash) ? location.hash : '#/';
+      }, text: 'Đăng nhập' }));
+      return;
+    }
+    var menu = h('div', { class: 'account__menu', id: 'account-menu', hidden: true }, [
+      h('div', { class: 'account__who' }, [h('b', { text: u.name || 'Tài khoản' }), h('small', { text: u.email })]),
+      h('a', { href: '#/history', text: '🕘 Lịch sử làm bài' }),
+      h('a', { href: '#/wrong', text: '✗ Câu sai của bạn' }),
+      h('button', { type: 'button', onclick: doSignOut, text: '↩ Đăng xuất' })
+    ]);
+    var btn = h('button', { type: 'button', class: 'account__btn', 'aria-expanded': 'false', 'aria-controls': 'account-menu', 'aria-label': 'Tài khoản: ' + (u.name || u.email) }, [
+      avatarEl(u),
+      h('span', { class: 'account__name', text: (u.name || u.email).split(/[\s@]/)[0] })
+    ]);
+    function setOpen(open) {
+      menu.hidden = !open;
+      btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+      if (open && motionOK()) G.fromTo(menu, { y: -6, autoAlpha: 0 }, { y: 0, autoAlpha: 1, duration: 0.2 });
+    }
+    btn.addEventListener('click', function (e) { e.stopPropagation(); setOpen(menu.hidden); });
+    menu.addEventListener('click', function (e) { if (e.target.closest('a,button')) setOpen(false); });
+    closeAccountMenu = function (focusBtn) { if (!menu.hidden) { setOpen(false); if (focusBtn) btn.focus(); } };
+    accountBox.appendChild(btn);
+    accountBox.appendChild(menu);
+  }
+  var closeAccountMenu = function () {};
+  document.addEventListener('click', function (e) { if (accountBox && !accountBox.contains(e.target)) closeAccountMenu(false); });
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape') closeAccountMenu(true); });
+
+  // Đổi người dùng -> đổi bộ dữ liệu, rồi vẽ lại trang (trừ khi đang làm bài).
+  function refreshView() {
+    if (/^#\/(quiz)/.test(location.hash)) return;
+    route();
+  }
+  function onUser(u) {
+    drawAccount();
+    var uid = u ? u.uid : null;
+    if (!uid) {
+      var wasIn = !!currentUid;
+      currentUid = null; lsSet(LAST_UID_KEY, null);
+      store = readLocal(null);
+      if (wasIn || /^#\/login/.test(location.hash)) refreshView();
+      return;
+    }
+    if (uid !== currentUid) {
+      currentUid = uid; lsSet(LAST_UID_KEY, uid);
+      store = readLocal(uid);
+      refreshView();
+    } else if (/^#\/login/.test(location.hash)) {
+      refreshView();
+    }
+    var before = JSON.stringify(store);
+    Cloud.load(uid).then(function (remote) {
+      if (currentUid !== uid) return;
+      var acc = remote ? normalize(remote) : store; // chưa có trên máy chủ: dùng bản trên máy (nếu có)
+      var dirty = !remote;
+      var guest = readLocal(null);
+      var askedKey = 'ontn-merge-asked:' + uid;
+      if (hasProgress(guest) && !lsGet(askedKey)) {
+        lsSet(askedKey, '1');
+        var nTests = Object.keys(guest.best).length, nWrong = Object.keys(guest.wrong).length;
+        if (window.confirm('Trên trình duyệt này đang có tiến độ làm khi chưa đăng nhập (' + nTests + ' đề, ' + nWrong + ' câu sai, ' + guest.history.length + ' lần nộp bài).\n\nGộp vào tài khoản của bạn?')) {
+          acc = mergeInto(acc, guest);
+          lsSet(keyFor(null), null);
+          dirty = true;
+          toast('Đã gộp tiến độ vào tài khoản.');
+        }
+      }
+      store = acc;
+      lsSet(keyFor(uid), JSON.stringify(store));
+      if (dirty) Cloud.save(uid, store, true);
+      if (JSON.stringify(store) !== before) refreshView();
+      updateNavCount();
+    }).catch(function (e) {
+      console.warn('[cloud] tải dữ liệu thất bại:', e && (e.code || e.message));
+      toast('Chưa tải được dữ liệu tài khoản — đang dùng bản lưu trên máy.');
+    });
+  }
+
   function pageNotFound() {
     setTitle('Không tìm thấy'); setNav('');
     render([h('h1', { text: 'Không tìm thấy trang' }), h('p', null, [h('a', { href: '#/', text: 'Về trang chủ' })])]);
@@ -1141,10 +1463,22 @@
       case 'wrong': return pageWrong();
       case 'videos': return pageVideos();
       case 'video': return pageVideo(parts[1]);
+      case 'login': return pageLogin();
+      case 'history': return pageHistory();
       default: return pageNotFound();
     }
   }
   window.addEventListener('hashchange', route);
   document.addEventListener('keydown', onKey);
   route();
+  if (Cloud) {
+    Cloud.onUser(onUser);
+    // Firebase không tải được: ẩn nút tài khoản; dữ liệu vẫn lưu trên máy như trước.
+    Cloud.ready.then(function (ok) {
+      if (ok) return;
+      cloudFailed = true;
+      if (accountBox) accountBox.hidden = true;
+      if (/^#\/login/.test(location.hash)) route();
+    });
+  }
 })();
