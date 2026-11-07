@@ -74,6 +74,55 @@
   var store = loadStore();
   store.best = store.best || {};
   store.prefs = store.prefs || { mode: 'practice', shuffleQ: false, shuffleO: true };
+  store.wrong = store.wrong || {};   // question id -> { n: times wrong, t: last time }
+  store.video = store.video || {};   // video number -> { t: position (s), done: bool }
+  // drop ids that no longer exist in the data
+  Object.keys(store.wrong).forEach(function (id) { if (!byId[id]) delete store.wrong[id]; });
+
+  // Ghi nhận một câu trả lời: sai -> thêm vào sổ câu sai; đúng -> gỡ khỏi sổ (đã thuộc).
+  function recordAnswer(q, chosen) {
+    if (chosen === null || chosen === undefined) return;
+    if (chosen !== q.answer) {
+      var prev = store.wrong[q.id];
+      store.wrong[q.id] = { n: (prev ? prev.n : 0) + 1, t: Date.now() };
+    } else if (store.wrong[q.id]) {
+      delete store.wrong[q.id];
+    }
+  }
+  function wrongIds(weekFilter) {
+    return DATA.questions.filter(function (q) {
+      return store.wrong[q.id] && (!weekFilter || weekFilter.indexOf(q.week) !== -1);
+    }).map(function (q) { return q.id; });
+  }
+  function updateNavCount() {
+    var el = document.querySelector('[data-wrong-count]');
+    if (!el) return;
+    var n = wrongIds().length;
+    el.textContent = n ? String(n) : '';
+    el.hidden = !n;
+  }
+
+  // ---------- videos ----------
+  var VIDEOS = [
+    { file: 'Video1_Dac_diem_mon_hoc.mp4', title: 'Đặc điểm môn học', week: '1', dur: 807 },
+    { file: 'Video2_Muc_tieu_chuong_trinh.mp4', title: 'Mục tiêu chương trình', week: '1', dur: 610 },
+    { file: 'Video3_Yeu_cau_can_dat.mp4', title: 'Yêu cầu cần đạt', week: '3', dur: 621 },
+    { file: 'Video4_Noi_dung_giao_duc.mp4', title: 'Nội dung giáo dục', week: '3', dur: 1074 },
+    { file: 'Video5_Phuong_phap_va_Danh_gia.mp4', title: 'Phương pháp và đánh giá', week: '4', dur: 786 },
+    { file: 'Video6_Phuong_phap_giao_duc_slide.mp4', title: 'Phương pháp giáo dục (bài giảng slide)', week: '4', dur: 495 }
+  ];
+  function fmtTime(s) {
+    s = Math.max(0, Math.round(s));
+    var m = Math.floor(s / 60), r = s % 60;
+    return m + ':' + (r < 10 ? '0' : '') + r;
+  }
+  function videoState(n) {
+    var v = store.video[n];
+    if (!v) return null;
+    if (v.done) return { cls: 'is-done', text: '✓ Đã xem' };
+    if (v.t > 5) return { cls: 'is-part', text: 'Đã xem tới ' + fmtTime(v.t) };
+    return null;
+  }
 
   // ---------- helpers ----------
   function h(tag, attrs, children) {
@@ -117,6 +166,7 @@
       if (a.getAttribute('data-nav') === name) a.setAttribute('aria-current', 'page');
       else a.removeAttribute('aria-current');
     });
+    updateNavCount();
   }
   function render(nodes, focus) {
     resetAnimations();
@@ -164,7 +214,8 @@
         h('p', { class: 'lead', text: 'Phân tích chương trình và xây dựng kế hoạch dạy học môn Tin học. Mỗi tuần chia thành các đề ngắn — làm hết các đề là đã ôn đủ mọi câu của tuần.' }),
         h('div', { class: 'actions' }, [
           h('a', { class: 'btn btn--primary', href: '#/start/' + DATA.weeks[0].id + '/1', text: 'Bắt đầu ' + DATA.weeks[0].label }),
-          h('a', { class: 'btn', href: '#/start/mix/30', text: 'Đề tổng hợp 30 câu' })
+          h('a', { class: 'btn', href: '#/start/mix', text: 'Đề tổng hợp' }),
+          h('a', { class: 'btn btn--ghost', href: '#/videos', text: '▶ Video bài giảng' })
         ])
       ]),
       h('div', { class: 'hero-stats' }, [
@@ -184,10 +235,7 @@
     var list = h('ul', { class: 'weeks' });
     DATA.weeks.forEach(function (w) {
       var c = levelCounts(w.ids);
-      var bar = h('div', { class: 'levelbar', role: 'img', 'aria-label': c.NB + ' câu nhận biết, ' + c.TH + ' thông hiểu, ' + c.VD + ' vận dụng' });
-      ['NB', 'TH', 'VD', 'x'].forEach(function (l) {
-        if (c[l]) bar.appendChild(h('span', { class: 'lv-' + l, style: 'width:' + (c[l] / w.count * 100) + '%' }));
-      });
+      var vids = VIDEOS.filter(function (v) { return v.week === w.id; });
       var tests = h('div', { class: 'week__tests' });
       w.tests.forEach(function (ids, i) {
         var key = testKey(w.id, i + 1);
@@ -204,7 +252,15 @@
             h('div', { class: 'week__meta', text: w.count + ' câu · ' + w.tests.length + ' đề · ' + c.NB + ' NB · ' + c.TH + ' TH · ' + c.VD + ' VD' })
           ])
         ]),
-        bar,
+        vids.length ? h('div', { class: 'week__videos' }, vids.map(function (v) {
+          var n = VIDEOS.indexOf(v) + 1;
+          var st = videoState(n);
+          return h('a', { class: 'vid-link' + (st ? ' ' + st.cls : ''), href: '#/video/' + n }, [
+            h('span', { class: 'vid-link__play', 'aria-hidden': 'true', text: st && st.cls === 'is-done' ? '✓' : '▶' }),
+            h('span', { class: 'vid-link__title', text: 'Video ' + n + ' · ' + v.title }),
+            h('small', { text: fmtTime(v.dur) })
+          ]);
+        })) : null,
         tests,
         h('div', { class: 'week__foot' }, [
           h('span', { class: 'muted small', text: 'Đã làm ' + doneTests(w) + '/' + w.tests.length + ' đề' }),
@@ -213,29 +269,43 @@
       ]));
     });
 
-    var mix = h('section', { class: 'panel panel--accent mix', 'aria-labelledby': 'mix-title' }, [
-      h('div', null, [
-        h('h2', { id: 'mix-title', text: 'Đề tổng hợp ngẫu nhiên' }),
-        h('p', { class: 'muted', style: 'margin:0', text: 'Lấy ngẫu nhiên từ tất cả các tuần để ôn tổng trước khi thi.' })
+    var nWrong = wrongIds().length;
+    var extras = h('div', { class: 'extras' }, [
+      h('section', { class: 'panel panel--accent mix', 'aria-labelledby': 'mix-title' }, [
+        h('div', null, [
+          h('h2', { id: 'mix-title', text: 'Đề tổng hợp ngẫu nhiên' }),
+          h('p', { class: 'muted', style: 'margin:0', text: 'Tự chọn số câu và các tuần muốn ôn; câu hỏi được lấy ngẫu nhiên.' })
+        ]),
+        h('div', { class: 'actions' }, [
+          h('a', { class: 'btn btn--primary', href: '#/start/mix', text: 'Tạo đề tổng hợp' })
+        ])
       ]),
-      h('div', { class: 'actions' }, [
-        h('a', { class: 'btn btn--primary', href: '#/start/mix/30', text: '30 câu' }),
-        h('a', { class: 'btn', href: '#/start/mix/50', text: '50 câu' })
+      h('section', { class: 'panel mix', 'aria-labelledby': 'wrong-title' }, [
+        h('div', null, [
+          h('h2', { id: 'wrong-title' }, ['Câu sai của bạn ', h('span', { class: 'count-pill' + (nWrong ? '' : ' is-zero'), text: String(nWrong) })]),
+          h('p', { class: 'muted', style: 'margin:0', text: nWrong
+            ? 'Xem lại đáp án và làm lại những câu đã trả lời sai. Trả lời đúng thì câu tự rời khỏi danh sách.'
+            : 'Chưa có câu sai nào. Câu bạn trả lời sai sẽ tự được lưu vào đây để ôn lại.' })
+        ]),
+        h('div', { class: 'actions' }, [
+          h('a', { class: 'btn' + (nWrong ? ' btn--primary' : ''), href: '#/wrong', text: 'Xem lại câu sai' }),
+          nWrong ? h('a', { class: 'btn', href: '#/start/wrong', text: 'Làm lại' }) : null
+        ])
       ])
     ]);
 
+    var vgrid = h('ul', { class: 'vgrid' }, VIDEOS.map(function (v, i) { return videoCard(v, i + 1); }));
+
     render([
       hero,
-      h('div', { class: 'section-head' }, [
-        h('h2', { text: 'Chọn tuần để ôn' }),
-        h('div', { class: 'legend', 'aria-hidden': 'true' }, [
-          h('span', null, [h('i', { class: 'lv-NB', style: 'background:#f7a8c4' }), 'Nhận biết']),
-          h('span', null, [h('i', { style: 'background:#e05891' }), 'Thông hiểu']),
-          h('span', null, [h('i', { style: 'background:#9c1f52' }), 'Vận dụng'])
-        ])
-      ]),
+      h('div', { class: 'section-head' }, [h('h2', { text: 'Chọn tuần để ôn' })]),
       list,
-      mix
+      extras,
+      h('div', { class: 'section-head', style: 'margin-top:32px' }, [
+        h('h2', { text: 'Video bài giảng' }),
+        h('a', { class: 'btn btn--ghost btn--sm', href: '#/videos', text: 'Xem tất cả →' })
+      ]),
+      vgrid
     ]);
 
     animate(function () {
@@ -251,13 +321,44 @@
       G.to('.blob--3', { x: 30, y: -20, scale: 1.15, duration: 7, ease: 'sine.inOut', repeat: -1, yoyo: true });
       G.from('.section-head', { y: 14, autoAlpha: 0, delay: 0.3 });
     });
-    revealOnScroll(Array.prototype.slice.call(app.querySelectorAll('.week, .mix')));
+    revealOnScroll(Array.prototype.slice.call(app.querySelectorAll('.week, .mix, .vcard')));
   }
 
+  function videoCard(v, n) {
+    var st = videoState(n);
+    var w = weekById[v.week];
+    return h('li', { class: 'vcard' + (st ? ' ' + st.cls : '') }, [
+      h('a', { href: '#/video/' + n }, [
+        h('div', { class: 'vcard__thumb' }, [
+          h('img', { src: 'videos/thumbs/v' + n + '.png', alt: '', loading: 'lazy', width: '640', height: '360' }),
+          h('span', { class: 'vcard__play', 'aria-hidden': 'true', text: '▶' }),
+          h('span', { class: 'vcard__dur', text: fmtTime(v.dur) })
+        ]),
+        h('div', { class: 'vcard__body' }, [
+          h('small', { text: 'Video ' + n + (w ? ' · ' + w.label : '') }),
+          h('h3', { text: v.title }),
+          st ? h('span', { class: 'vcard__state', text: st.text }) : null
+        ])
+      ])
+    ]);
+  }
+
+  // Bộ câu "chọn số câu": lấy ngẫu nhiên n câu từ một kho (pool), có thể lọc theo tuần.
+  var retryPool = null; // câu sai của lần nộp bài gần nhất
   function resolveSet(weekId, testId) {
     if (weekId === 'mix') {
-      var n = Math.min(parseInt(testId, 10) || 30, DATA.questions.length);
-      return { title: 'Đề tổng hợp · ' + n + ' câu ngẫu nhiên', ids: null, mixCount: n, key: null };
+      return { kind: 'mix', title: 'Đề tổng hợp', badge: 'Mix', desc: 'Câu hỏi lấy ngẫu nhiên từ các tuần bạn chọn.',
+        pool: function (weeks) { return DATA.questions.filter(function (q) { return weeks.indexOf(q.week) !== -1; }).map(function (q) { return q.id; }); },
+        weekPick: true, defaultCount: parseInt(testId, 10) || 30 };
+    }
+    if (weekId === 'wrong') {
+      return { kind: 'wrong', title: 'Làm lại câu sai', badge: 'Sai', desc: 'Lấy từ danh sách câu bạn đã trả lời sai. Trả lời đúng thì câu tự rời khỏi danh sách.',
+        pool: function (weeks) { return wrongIds(weeks); }, weekPick: true, defaultCount: parseInt(testId, 10) || 20 };
+    }
+    if (weekId === 'retry') {
+      if (!retryPool || !retryPool.ids.length) return null;
+      return { kind: 'retry', title: 'Làm lại câu sai', badge: 'Sai', desc: 'Các câu sai và bỏ trống của bài “' + retryPool.from + '”.',
+        pool: function () { return retryPool.ids.slice(); }, weekPick: false, defaultCount: retryPool.ids.length };
     }
     var w = weekById[weekId];
     if (!w) return null;
@@ -270,9 +371,72 @@
   function pageStart(weekId, testId) {
     var set = resolveSet(weekId, testId);
     if (!set) return pageNotFound();
-    setTitle(set.title); setNav('home');
+    setTitle(set.title); setNav(set.kind === 'wrong' || set.kind === 'retry' ? 'wrong' : 'home');
     var p = store.prefs;
-    var count = set.ids ? set.ids.length : set.mixCount;
+    var isPool = !!set.pool;
+    var count = isPool ? 0 : set.ids.length;
+    var startBtn = h('button', { class: 'btn btn--primary', type: 'submit' });
+
+    // --- số câu + chọn tuần (chỉ cho đề tổng hợp / làm lại câu sai) ---
+    var poolBox = null, numInput = null, poolInfo = null, presetRow = null, weekBoxes = [];
+    function selectedWeeks() {
+      if (!set.weekPick) return null;
+      return weekBoxes.filter(function (b) { return b.checked; }).map(function (b) { return b.value; });
+    }
+    function currentPool() { return set.pool(selectedWeeks()); }
+    function syncCount(fromUser) {
+      var max = currentPool().length;
+      numInput.max = String(Math.max(1, max));
+      var v = parseInt(numInput.value, 10);
+      if (isNaN(v) && !fromUser) v = Math.min(set.defaultCount, max);
+      if (isNaN(v)) {
+        count = 0; // ô đang trống khi người dùng gõ
+      } else {
+        v = Math.max(max ? 1 : 0, Math.min(v, max));
+        if (String(v) !== numInput.value) numInput.value = String(v);
+        count = v;
+      }
+      poolInfo.textContent = max ? 'Có ' + max + ' câu phù hợp — chọn từ 1 đến ' + max + ' câu.' : 'Không có câu nào phù hợp. Hãy chọn thêm tuần.';
+      presetRow.querySelectorAll('.chip').forEach(function (c) {
+        var n = c.getAttribute('data-n') === 'all' ? max : parseInt(c.getAttribute('data-n'), 10);
+        c.hidden = c.getAttribute('data-n') !== 'all' && n >= max;
+        c.setAttribute('aria-pressed', n === count ? 'true' : 'false');
+        if (c.getAttribute('data-n') === 'all') c.textContent = 'Tất cả (' + max + ')';
+      });
+      startBtn.textContent = 'Bắt đầu (' + count + ' câu)';
+      startBtn.disabled = !count;
+    }
+    if (isPool) {
+      numInput = h('input', { type: 'number', class: 'num-input', id: 'qcount', min: '1', inputmode: 'numeric', value: String(set.defaultCount) });
+      numInput.addEventListener('input', function () { syncCount(true); });
+      numInput.addEventListener('change', function () { syncCount(false); });
+      presetRow = h('div', { class: 'filter-row', role: 'group', 'aria-label': 'Chọn nhanh số câu' });
+      [10, 20, 30, 50, 'all'].forEach(function (n) {
+        presetRow.appendChild(h('button', { type: 'button', class: 'chip', 'data-n': String(n), text: n === 'all' ? 'Tất cả' : n + ' câu',
+          onclick: function () { numInput.value = String(n === 'all' ? currentPool().length : n); syncCount(false); } }));
+      });
+      poolInfo = h('p', { class: 'muted small', style: 'margin:8px 0 0', role: 'status' });
+      var weekField = null;
+      if (set.weekPick) {
+        var wl = h('div', { class: 'week-picks' });
+        DATA.weeks.forEach(function (w) {
+          var avail = set.pool([w.id]).length;
+          var cb = h('input', { type: 'checkbox', value: w.id, checked: avail ? true : null, disabled: avail ? null : true });
+          cb.addEventListener('change', function () { syncCount(false); });
+          weekBoxes.push(cb);
+          wl.appendChild(h('label', { class: 'week-pick' + (avail ? '' : ' is-empty') }, [cb, h('span', null, [h('b', { text: w.label }), h('small', { text: avail + ' câu' })])]));
+        });
+        weekField = h('fieldset', null, [h('legend', { text: 'Lấy câu từ các tuần' }), wl]);
+      }
+      poolBox = h('div', null, [
+        h('fieldset', null, [
+          h('legend', null, [h('label', { for: 'qcount', text: 'Số câu hỏi' })]),
+          h('div', { class: 'count-row' }, [numInput, presetRow]),
+          poolInfo
+        ]),
+        weekField
+      ]);
+    }
     function radio(name, value, label, desc) {
       return h('label', { class: 'choice' }, [
         h('input', { type: 'radio', name: name, value: value, checked: p.mode === value }),
@@ -285,7 +449,8 @@
         h('span', null, [h('b', { text: label }), h('small', { text: desc })])
       ]);
     }
-    var form = h('form', { class: 'panel' }, [
+    var form = h('form', { class: 'panel', novalidate: true }, [
+      poolBox,
       h('fieldset', null, [
         h('legend', { text: 'Chế độ làm bài' }),
         h('div', { class: 'choices' }, [
@@ -296,29 +461,42 @@
       h('fieldset', null, [
         h('legend', { text: 'Tùy chọn' }),
         h('div', { class: 'choices' }, [
-          check('shuffleQ', 'Xáo trộn câu hỏi', 'Mặc định xếp từ Nhận biết đến Vận dụng.'),
+          isPool ? null : check('shuffleQ', 'Xáo trộn câu hỏi', 'Mặc định xếp từ Nhận biết đến Vận dụng.'),
           check('shuffleO', 'Xáo trộn đáp án', 'Nhớ nội dung thay vì nhớ vị trí A/B/C/D.')
         ])
       ]),
       h('div', { class: 'actions' }, [
-        h('button', { class: 'btn btn--primary', type: 'submit', text: 'Bắt đầu (' + count + ' câu)' }),
-        h('a', { class: 'btn', href: '#/', text: 'Quay lại' })
+        startBtn,
+        h('a', { class: 'btn', href: set.kind === 'wrong' ? '#/wrong' : '#/', text: 'Quay lại' })
       ])
     ]);
+    if (isPool) syncCount(false);
+    else startBtn.textContent = 'Bắt đầu (' + count + ' câu)';
     form.addEventListener('submit', function (e) {
       e.preventDefault();
       var fd = new FormData(form);
-      store.prefs = { mode: fd.get('mode') || 'practice', shuffleQ: fd.get('shuffleQ') === 'on', shuffleO: fd.get('shuffleO') === 'on' };
+      store.prefs = {
+        mode: fd.get('mode') || 'practice',
+        shuffleQ: isPool ? store.prefs.shuffleQ : fd.get('shuffleQ') === 'on',
+        shuffleO: fd.get('shuffleO') === 'on'
+      };
       saveStore(store);
-      startQuiz(set, store.prefs);
+      if (isPool) {
+        syncCount(false);
+        if (!count) return;
+        var ids = shuffle(currentPool()).slice(0, count);
+        startQuiz({ kind: set.kind, title: set.title + ' · ' + count + ' câu', ids: ids, key: null }, store.prefs);
+      } else {
+        startQuiz(set, store.prefs);
+      }
     });
     render([
-      h('a', { class: 'back', href: '#/', text: '← Các tuần' }),
+      h('a', { class: 'back', href: set.kind === 'wrong' ? '#/wrong' : '#/', text: set.kind === 'wrong' ? '← Câu sai của bạn' : '← Các tuần' }),
       h('div', { class: 'setup-head' }, [
-        set.week ? weekBadge(set.week) : h('div', { class: 'week__num', 'aria-hidden': 'true' }, [h('small', { text: 'Mix' }), h('span', { text: String(count) })]),
+        set.week ? weekBadge(set.week) : h('div', { class: 'week__num', 'aria-hidden': 'true' }, [h('span', { text: set.badge || 'Mix' })]),
         h('div', null, [
           h('h1', { style: 'margin:0', text: set.title }),
-          h('p', { class: 'muted', style: 'margin:2px 0 0', text: set.week ? set.week.title : 'Câu hỏi lấy ngẫu nhiên từ tất cả các tuần.' })
+          h('p', { class: 'muted', style: 'margin:2px 0 0', text: set.week ? set.week.title : set.desc })
         ])
       ]),
       form
@@ -485,6 +663,7 @@
     var it = quiz.items[quiz.idx];
     if (quiz.prefs.mode === 'practice' && it.chosen !== null) return;
     it.chosen = origIdx;
+    if (quiz.prefs.mode === 'practice') { recordAnswer(it.q, origIdx); saveStore(store); updateNavCount(); }
     drawQuiz('answer');
   }
   function go(i) {
@@ -499,13 +678,14 @@
     quiz.submitted = true;
     var correct = quiz.items.filter(function (it) { return it.chosen === it.q.answer; }).length;
     quiz.result = { correct: correct, total: quiz.items.length };
+    if (quiz.prefs.mode !== 'practice') quiz.items.forEach(function (it) { recordAnswer(it.q, it.chosen); });
     if (quiz.set.key) {
       var prev = store.best[quiz.set.key];
       if (!prev || correct / quiz.items.length >= prev.correct / prev.total) {
         store.best[quiz.set.key] = { correct: correct, total: quiz.items.length };
-        saveStore(store);
       }
     }
+    saveStore(store);
     location.hash = '#/result';
   }
 
@@ -531,7 +711,7 @@
     var r = quiz.result;
     var pct = Math.round(r.correct / r.total * 100);
     var skipped = quiz.items.filter(function (x) { return x.chosen === null; }).length;
-    var wrongIds = quiz.items.filter(function (it) { return it.chosen !== it.q.answer; }).map(function (it) { return it.q.id; });
+    var missIds = quiz.items.filter(function (it) { return it.chosen !== it.q.answer; }).map(function (it) { return it.q.id; });
     var filter = 'wrong';
 
     var list = h('ol', { class: 'review' });
@@ -565,7 +745,7 @@
       });
       return b;
     }
-    chips.appendChild(chip('wrong', 'Câu sai & bỏ trống (' + wrongIds.length + ')'));
+    chips.appendChild(chip('wrong', 'Câu sai & bỏ trống (' + missIds.length + ')'));
     chips.appendChild(chip('all', 'Tất cả (' + r.total + ')'));
 
     var again = quiz.set;
@@ -585,11 +765,15 @@
             h('p', { class: 'verdict', text: pct >= 80 ? 'Nắm bài rất tốt! ✿' : pct >= 50 ? 'Khá ổn, ôn lại các câu sai nhé.' : 'Cần ôn thêm phần này.' }),
             h('p', { class: 'muted small', style: 'margin:0 0 14px', text: 'Đúng ' + r.correct + ' · Sai ' + (r.total - r.correct - skipped) + ' · Bỏ trống ' + skipped }),
             h('div', { class: 'actions' }, [
-              wrongIds.length ? h('button', { type: 'button', class: 'btn btn--primary', onclick: function () {
-                startQuiz({ title: 'Làm lại câu sai', ids: wrongIds.slice(), key: null }, quiz.prefs);
-              }, text: 'Làm lại ' + wrongIds.length + ' câu sai' }) : null,
-              h('button', { type: 'button', class: 'btn', onclick: function () { startQuiz(again, quiz.prefs); }, text: 'Làm lại đề này' }),
-              h('a', { class: 'btn btn--ghost', href: '#/', text: 'Chọn đề khác' })
+              missIds.length ? h('button', { type: 'button', class: 'btn btn--primary', onclick: function () {
+                retryPool = { ids: missIds.slice(), from: quiz.set.title };
+                location.hash = '#/start/retry';
+              }, text: 'Làm lại ' + missIds.length + ' câu sai' }) : null,
+              h('button', { type: 'button', class: 'btn', onclick: function () {
+                if (again.kind === 'mix' || again.kind === 'wrong') { location.hash = '#/start/' + again.kind; return; }
+                startQuiz(again, quiz.prefs);
+              }, text: again.kind === 'mix' || again.kind === 'wrong' ? 'Tạo đề mới' : 'Làm lại đề này' }),
+              h('a', { class: 'btn btn--ghost', href: '#/wrong', text: 'Sổ câu sai' })
             ])
           ])
         ])
@@ -713,6 +897,233 @@
     draw();
   }
 
+  // ---------- sổ câu sai ----------
+  function pageWrong() {
+    setTitle('Câu sai của bạn'); setNav('wrong');
+    var filter = '';
+    var list = h('ol', { class: 'bank-list' });
+    var head = h('div', { class: 'wrong-head panel panel--accent' });
+    var chips = h('div', { class: 'filter-row', role: 'group', 'aria-label': 'Lọc theo tuần' });
+
+    function drawHead() {
+      var all = wrongIds();
+      head.innerHTML = '';
+      head.appendChild(h('div', null, [
+        h('p', { class: 'big-num' }, [h('b', { text: String(all.length) }), ' câu đang cần ôn lại']),
+        h('p', { class: 'muted small', style: 'margin:0', text: all.length
+          ? 'Mỗi câu trả lời sai sẽ được lưu ở đây (trên trình duyệt này). Làm lại mà trả lời đúng thì câu đó tự được gỡ khỏi danh sách.'
+          : 'Chưa có câu sai nào. Hãy làm một đề — câu nào trả lời sai sẽ tự xuất hiện ở đây.' })
+      ]));
+      head.appendChild(h('div', { class: 'actions' }, all.length ? [
+        h('a', { class: 'btn btn--primary', href: '#/start/wrong', text: 'Làm lại câu sai…' }),
+        h('button', { type: 'button', class: 'btn btn--ghost', onclick: function () {
+          if (!window.confirm('Xoá toàn bộ ' + all.length + ' câu khỏi danh sách câu sai?')) return;
+          store.wrong = {}; saveStore(store); updateNavCount(); drawAll();
+        }, text: 'Xoá danh sách' })
+      ] : [h('a', { class: 'btn btn--primary', href: '#/', text: 'Chọn đề để làm' })]));
+    }
+    function drawChips() {
+      chips.innerHTML = '';
+      var all = wrongIds();
+      if (!all.length) return;
+      var opts = [{ id: '', label: 'Tất cả (' + all.length + ')' }];
+      DATA.weeks.forEach(function (w) {
+        var n = wrongIds([w.id]).length;
+        if (n) opts.push({ id: w.id, label: w.label + ' (' + n + ')' });
+      });
+      if (filter && !opts.some(function (o) { return o.id === filter; })) filter = '';
+      opts.forEach(function (o) {
+        chips.appendChild(h('button', { type: 'button', class: 'chip', 'aria-pressed': filter === o.id ? 'true' : 'false', text: o.label,
+          onclick: function () { filter = o.id; drawChips(); drawList(); } }));
+      });
+    }
+    function drawList() {
+      list.innerHTML = '';
+      var ids = wrongIds(filter ? [filter] : null);
+      ids.sort(function (a, b) { return (store.wrong[b].n - store.wrong[a].n) || (store.wrong[b].t - store.wrong[a].t); });
+      ids.forEach(function (id) {
+        var q = byId[id];
+        var rec = store.wrong[id];
+        var ol = h('ol');
+        q.options.forEach(function (o, i) {
+          ol.appendChild(h('li', { class: i === q.answer ? 'is-answer' : '' }, [
+            h('b', { text: LETTERS[i] + '.' }), h('span', { text: o }),
+            i === q.answer ? h('span', { class: 'sr-only', text: ' (đáp án đúng)' }) : null
+          ]));
+        });
+        var item = h('li', { class: 'bank-item review-item is-wrong' }, [
+          h('div', { class: 'qmeta' }, [
+            h('span', { class: 'qnum', text: weekById[q.week].label }), levelTag(q.level),
+            h('span', { class: 'miss-count', text: 'Sai ' + rec.n + ' lần' }),
+            h('span', { class: 'spacer' }),
+            h('button', { type: 'button', class: 'btn btn--ghost btn--sm', onclick: function () {
+              delete store.wrong[id]; saveStore(store); updateNavCount();
+              drawHead(); drawChips();
+              var gone = false;
+              var finish = function () {
+                if (gone) return; gone = true;
+                item.remove();
+                if (!list.children.length || (filter && !wrongIds([filter]).length)) { filter = ''; drawChips(); drawList(); }
+              };
+              if (motionOK()) {
+                G.killTweensOf(item);
+                G.to(item, { autoAlpha: 0, height: 0, paddingTop: 0, paddingBottom: 0, marginTop: -12, duration: 0.35, ease: 'power2.in', overwrite: true, onComplete: finish });
+                setTimeout(finish, 500);
+              } else finish();
+            }, text: '✓ Đã thuộc' })
+          ]),
+          h('p', { class: 'qtext', style: 'margin:0', text: q.q }),
+          ol,
+          q.note ? h('div', { class: 'note', text: q.note }) : null
+        ]);
+        list.appendChild(item);
+      });
+      if (!ids.length) list.appendChild(h('li', { class: 'empty', text: 'Không còn câu sai nào. Rất tốt! ✿' }));
+      else revealOnScroll(Array.prototype.slice.call(list.children, 0, 40));
+    }
+    function drawAll() { drawHead(); drawChips(); drawList(); }
+
+    render([
+      h('span', { class: 'eyebrow', text: '✿ Ôn lại chỗ còn yếu' }),
+      h('h1', { text: 'Câu sai của bạn' }),
+      head,
+      chips,
+      list
+    ]);
+    drawAll();
+    animate(function () {
+      G.from('.eyebrow, h1, .wrong-head', { y: 16, autoAlpha: 0, stagger: 0.07 });
+      G.from('.big-num b', { scale: 0.6, duration: 0.6, ease: 'back.out(2.5)', delay: 0.2 });
+    });
+  }
+
+  // ---------- video ----------
+  function pageVideos() {
+    setTitle('Video bài giảng'); setNav('videos');
+    var total = VIDEOS.reduce(function (s, v) { return s + v.dur; }, 0);
+    var done = VIDEOS.filter(function (_, i) { return store.video[i + 1] && store.video[i + 1].done; }).length;
+    render([
+      h('span', { class: 'eyebrow', text: '▶ ' + VIDEOS.length + ' video · khoảng ' + Math.round(total / 60) + ' phút' }),
+      h('h1', { text: 'Video bài giảng' }),
+      h('p', { class: 'lead', text: 'Xem video theo tuần rồi làm trắc nghiệm ngay bên dưới. Trang tự nhớ chỗ bạn đang xem dở. Đã xem xong ' + done + '/' + VIDEOS.length + ' video.' }),
+      h('ul', { class: 'vgrid' }, VIDEOS.map(function (v, i) { return videoCard(v, i + 1); }))
+    ]);
+    animate(function () {
+      G.from('.eyebrow, h1, .lead', { y: 16, autoAlpha: 0, stagger: 0.07 });
+    });
+    revealOnScroll(Array.prototype.slice.call(app.querySelectorAll('.vcard')));
+  }
+
+  function pageVideo(nStr) {
+    var n = parseInt(nStr, 10);
+    var v = VIDEOS[n - 1];
+    if (!v) return pageNotFound();
+    setTitle(v.title); setNav('videos');
+    var w = weekById[v.week];
+    var saved = store.video[n] || {};
+    var video = h('video', {
+      class: 'player__video', controls: true, preload: 'metadata', playsinline: true,
+      poster: 'videos/thumbs/v' + n + '.png', src: 'videos/' + v.file,
+      'aria-label': 'Video ' + n + ': ' + v.title
+    });
+    var resume = null;
+    if (saved.t > 5 && !saved.done) {
+      resume = h('div', { class: 'resume', role: 'status' }, [
+        h('span', { text: 'Tiếp tục từ ' + fmtTime(saved.t) + '.' }),
+        h('button', { type: 'button', class: 'btn btn--ghost btn--sm', onclick: function () {
+          video.currentTime = 0; resume.remove();
+        }, text: 'Xem từ đầu' })
+      ]);
+      video.addEventListener('loadedmetadata', function () {
+        if (video.currentTime < 1 && saved.t < video.duration - 5) video.currentTime = saved.t;
+      }, { once: true });
+    }
+    var lastSave = 0;
+    var started = false; // chỉ lưu vị trí sau khi người xem thật sự bấm phát
+    video.addEventListener('playing', function () { started = true; });
+    function persist(force) {
+      if (!started) return;
+      var now = Date.now();
+      if (!force && now - lastSave < 3000) return;
+      lastSave = now;
+      var rec = store.video[n] || {};
+      rec.t = video.currentTime;
+      if (video.duration && video.currentTime >= video.duration * 0.95) rec.done = true;
+      store.video[n] = rec;
+      saveStore(store);
+    }
+    video.addEventListener('timeupdate', function () { persist(false); });
+    video.addEventListener('pause', function () { persist(true); });
+    video.addEventListener('ended', function () {
+      store.video[n] = { t: 0, done: true }; saveStore(store);
+      if (endCard) { endCard.hidden = false; if (motionOK()) G.from(endCard, { y: 12, autoAlpha: 0 }); }
+    });
+
+    var speeds = h('div', { class: 'filter-row', role: 'group', 'aria-label': 'Tốc độ phát', style: 'margin:0' });
+    [1, 1.25, 1.5, 2].forEach(function (s) {
+      speeds.appendChild(h('button', { type: 'button', class: 'chip', 'aria-pressed': s === 1 ? 'true' : 'false', text: s + '×', onclick: function (e) {
+        video.playbackRate = s;
+        speeds.querySelectorAll('.chip').forEach(function (c) { c.setAttribute('aria-pressed', c === e.currentTarget ? 'true' : 'false'); });
+      } }));
+    });
+
+    var endCard = h('div', { class: 'panel panel--accent end-card', hidden: true }, [
+      h('b', { text: 'Xem xong rồi! Làm trắc nghiệm để kiểm tra lại nhé.' }),
+      h('div', { class: 'actions' }, [
+        h('a', { class: 'btn btn--primary', href: '#/start/' + w.id + '/1', text: 'Làm Đề 1 · ' + w.label }),
+        VIDEOS[n] ? h('a', { class: 'btn', href: '#/video/' + (n + 1), text: 'Video tiếp theo →' }) : null
+      ])
+    ]);
+
+    var playlist = h('ol', { class: 'playlist' }, VIDEOS.map(function (x, i) {
+      var st = videoState(i + 1);
+      return h('li', null, [h('a', { href: '#/video/' + (i + 1), 'aria-current': i + 1 === n ? 'page' : null, class: st ? st.cls : null }, [
+        h('img', { src: 'videos/thumbs/v' + (i + 1) + '.png', alt: '', loading: 'lazy', width: '96', height: '54' }),
+        h('span', null, [h('b', { text: (i + 1) + '. ' + x.title }), h('small', { text: fmtTime(x.dur) + (st ? ' · ' + st.text : '') })])
+      ])]);
+    }));
+
+    render([
+      h('a', { class: 'back', href: '#/videos', text: '← Tất cả video' }),
+      h('div', { class: 'video-layout' }, [
+        h('div', null, [
+          h('div', { class: 'player' }, [video]),
+          h('div', { class: 'player__bar' }, [
+            h('div', null, [
+              h('small', { class: 'muted', text: 'Video ' + n + '/' + VIDEOS.length + ' · ' + w.label + ' · ' + fmtTime(v.dur) }),
+              h('h1', { class: 'player__title', text: v.title })
+            ]),
+            speeds
+          ]),
+          resume,
+          endCard,
+          h('section', { class: 'panel video-quiz', 'aria-labelledby': 'vq-title' }, [
+            h('div', null, [
+              h('h2', { id: 'vq-title', text: 'Ôn trắc nghiệm ' + w.label }),
+              h('p', { class: 'muted small', style: 'margin:0', text: w.title + ' · ' + w.count + ' câu' })
+            ]),
+            h('div', { class: 'week__tests' }, w.tests.map(function (ids, i) {
+              var key = testKey(w.id, i + 1);
+              return h('a', { class: 'test-btn' + (store.best[key] ? ' is-done' : ''), href: '#/start/' + w.id + '/' + (i + 1) }, [
+                h('span', { class: 'test-btn__top' }, ['Đề ' + (i + 1), bestBadge(key)]),
+                h('small', { text: ids.length + ' câu' })
+              ]);
+            }))
+          ])
+        ]),
+        h('aside', { class: 'side', 'aria-label': 'Danh sách video' }, [h('h2', { text: 'Danh sách video' }), playlist])
+      ])
+    ]);
+    animate(function () {
+      G.timeline()
+        .from('.player', { y: 20, autoAlpha: 0, duration: 0.55 })
+        .from('.player__bar > *, .resume', { y: 10, autoAlpha: 0, stagger: 0.06, duration: 0.4 }, '<0.15')
+        .from('.side', { x: 20, autoAlpha: 0, duration: 0.5 }, 0)
+        .from('.playlist li', { x: 12, autoAlpha: 0, stagger: 0.05, duration: 0.35 }, 0.15)
+        .from('.video-quiz', { y: 16, autoAlpha: 0, duration: 0.5 }, 0.3);
+    });
+  }
+
   function pageNotFound() {
     setTitle('Không tìm thấy'); setNav('');
     render([h('h1', { text: 'Không tìm thấy trang' }), h('p', null, [h('a', { href: '#/', text: 'Về trang chủ' })])]);
@@ -727,6 +1138,9 @@
       case 'quiz': return pageQuiz();
       case 'result': return pageResult();
       case 'bank': return pageBank();
+      case 'wrong': return pageWrong();
+      case 'videos': return pageVideos();
+      case 'video': return pageVideo(parts[1]);
       default: return pageNotFound();
     }
   }
