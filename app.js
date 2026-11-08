@@ -215,6 +215,21 @@
     return level ? h('span', { class: 'tag tag--' + level, text: LEVEL_NAME[level] || level }) : null;
   }
   function sourcesText(q) { return 'Nguồn: Nhóm ' + q.sources.join(', '); }
+
+  // Giải thích tham khảo (data/explanations.js). collapsed = dạng thu gọn (ngân hàng câu hỏi).
+  var EXPLAIN = window.QUIZ_EXPLAIN || {};
+  function explainEl(q, collapsed) {
+    var text = EXPLAIN[q.id];
+    if (!text) return null;
+    var label = h('span', { class: 'explain__label', text: '💡 Giải thích (tham khảo)' });
+    if (collapsed) {
+      return h('details', { class: 'explain explain--fold' }, [
+        h('summary', null, [label]),
+        h('p', { text: text })
+      ]);
+    }
+    return h('div', { class: 'explain' }, [label, h('p', { text: text })]);
+  }
   function testKey(weekId, testId) { return weekId + ':' + testId; }
   function bestBadge(key) {
     var b = store.best[key];
@@ -654,6 +669,7 @@
             h('p', { class: 'qtext', id: 'qtext', text: q.q }),
             opts,
             feedback,
+            reveal ? explainEl(q) : null,
             reveal && q.note ? h('div', { class: 'note', text: q.note }) : null
           ]),
           nav,
@@ -690,6 +706,7 @@
           G.fromTo('.opt.is-correct .opt__key', { scale: 0.4, rotation: -90 }, { scale: 1, rotation: 0, duration: 0.5, ease: 'back.out(2.5)' });
           G.fromTo('.opt.is-wrong', { x: 0 }, { x: 7, duration: 0.07, repeat: 5, yoyo: true, ease: 'power1.inOut', clearProps: 'transform' });
           G.from('.feedback', { y: -8, autoAlpha: 0, duration: 0.35 });
+          G.from('.qcard .explain', { y: -6, autoAlpha: 0, duration: 0.4, delay: 0.12 });
           G.from('.opt__mark', { x: 10, autoAlpha: 0, duration: 0.35, delay: 0.1 });
         } else {
           G.fromTo('.opt[aria-pressed="true"] .opt__key', { scale: 0.5 }, { scale: 1, duration: 0.4, ease: 'back.out(3)' });
@@ -771,6 +788,7 @@
             ? h('p', { class: 'review-ans ans-bad' }, [h('b', { text: '✗ Bạn chọn: ' }), it.chosen === null ? '(bỏ trống)' : posOf(it.chosen) + '. ' + q.options[it.chosen]])
             : null,
           h('p', { class: 'review-ans ans-ok' }, [h('b', { text: '✓ Đáp án đúng: ' }), posOf(q.answer) + '. ' + q.options[q.answer]]),
+          explainEl(q),
           q.note ? h('div', { class: 'note', text: q.note }) : null
         ]));
       });
@@ -908,6 +926,7 @@
             h('div', { class: 'qmeta' }, [h('span', { class: 'qnum', text: wk.label }), levelTag(q.level), h('span', { text: '· ' + sourcesText(q) })]),
             h('p', { class: 'qtext', style: 'margin:0', html: highlight(q.q, terms) }),
             ol,
+            explainEl(q, true),
             q.note ? h('div', { class: 'note', text: q.note }) : null
           ]));
         });
@@ -1016,6 +1035,7 @@
           ]),
           h('p', { class: 'qtext', style: 'margin:0', text: q.q }),
           ol,
+          explainEl(q),
           q.note ? h('div', { class: 'note', text: q.note }) : null
         ]);
         list.appendChild(item);

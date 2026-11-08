@@ -261,6 +261,16 @@ legend { font-weight: 700; margin-bottom: 8px; padding: 0; }
 .feedback--bad { background: var(--wrong-soft); color: var(--wrong); }
 .note { margin-top: 10px; padding: 9px 14px; border-radius: var(--radius); background: var(--warn-soft); color: var(--warn); font-size: 14px; }
 
+.explain { margin-top: 12px; padding: 12px 16px; border-radius: var(--radius); background: var(--primary-soft); border-left: 4px solid var(--primary); color: var(--text); font-size: 15px; line-height: 1.55; }
+.explain p { margin: 4px 0 0; }
+.explain__label { display: inline-block; font-size: 13px; font-weight: 700; color: var(--primary-strong); letter-spacing: .01em; }
+.explain--fold { padding: 8px 14px; }
+.explain--fold summary { cursor: pointer; list-style: none; }
+.explain--fold summary::-webkit-details-marker { display: none; }
+.explain--fold summary::after { content: ' ▸'; color: var(--primary-strong); font-size: 12px; }
+.explain--fold[open] summary::after { content: ' ▾'; }
+.explain--fold summary:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; border-radius: 4px; }
+
 .quiz-nav { display: flex; justify-content: space-between; gap: 8px; margin-top: 18px; flex-wrap: wrap; }
 .quiz-nav .spacer { flex: 1; }
 
