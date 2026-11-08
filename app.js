@@ -1317,6 +1317,134 @@
   }
 
   // ---------- lịch sử ----------
+  function fmtDateTime(t) {
+    var d = new Date(t);
+    var p = function (n) { return (n < 10 ? '0' : '') + n; };
+    return p(d.getHours()) + ':' + p(d.getMinutes()) + ' · ' + p(d.getDate()) + '/' + p(d.getMonth() + 1) + '/' + d.getFullYear();
+  }
+  function pctClass(pct) { return 'pct ' + (pct >= 80 ? 'is-good' : pct >= 50 ? 'is-mid' : 'is-low'); }
+  function historyItem(x) {
+    var pct = Math.round(x.c / x.n * 100);
+    return h('li', { class: 'history-item' }, [
+      h('span', { class: pctClass(pct), text: pct + '%' }),
+      h('div', { class: 'history-item__main' }, [
+        h('b', { text: x.title }),
+        h('small', { class: 'muted', text: fmtDateTime(x.t) + ' · ' + (x.mode === 'exam' ? 'Thi thử' : 'Luyện tập') })
+      ]),
+      h('span', { class: 'history-item__score', text: x.c + '/' + x.n })
+    ]);
+  }
+
+  // ---------- quản trị (chỉ xem) ----------
+  function relTime(t) {
+    if (!t) return 'chưa rõ';
+    var s = Math.max(0, (Date.now() - t) / 1000);
+    if (s < 60) return 'vừa xong';
+    if (s < 3600) return Math.floor(s / 60) + ' phút trước';
+    if (s < 86400) return Math.floor(s / 3600) + ' giờ trước';
+    if (s < 86400 * 30) return Math.floor(s / 86400) + ' ngày trước';
+    return fmtDateTime(t).split(' · ')[1];
+  }
+  function pageAdmin() {
+    setTitle('Quản trị'); setNav('');
+    var body = h('div', { class: 'admin-body' }, [h('p', { class: 'muted', text: 'Đang tải…' })]);
+    render([
+      h('span', { class: 'eyebrow', text: '⚙ Quản trị viên' }),
+      h('h1', { text: 'Người dùng' }),
+      h('p', { class: 'lead', text: 'Thống kê các tài khoản đã đăng nhập và lưu tiến độ. Người học không đăng nhập thì không được tính.' }),
+      body
+    ]);
+    function show(nodes) { body.innerHTML = ''; nodes.forEach(function (n) { if (n) body.appendChild(n); }); }
+    if (!Cloud || cloudFailed) { show([h('p', { class: 'notice', text: 'Không kết nối được Firebase.' })]); return; }
+    Cloud.ready.then(function (ok) {
+      if (location.hash !== '#/admin') return;
+      if (!ok) { show([h('p', { class: 'notice', text: 'Không kết nối được Firebase.' })]); return; }
+      if (!Cloud.user()) {
+        show([h('div', { class: 'resume' }, [
+          h('span', { text: 'Hãy đăng nhập bằng tài khoản quản trị.' }),
+          h('a', { class: 'btn btn--primary btn--sm', href: '#/login', onclick: function () { afterLogin = '#/admin'; }, text: 'Đăng nhập' })
+        ])]);
+        return;
+      }
+      if (!Cloud.isAdmin()) { show([h('p', { class: 'notice', text: 'Tài khoản này không có quyền quản trị.' })]); return; }
+      load();
+    });
+
+    function load() {
+      show([h('p', { class: 'muted', text: 'Đang tải danh sách người dùng…' })]);
+      Cloud.listUsers().then(function (users) {
+        if (location.hash !== '#/admin') return;
+        draw(users);
+      }).catch(function (e) {
+        show([h('p', { class: 'notice', text: 'Không tải được dữ liệu (' + (e && (e.code || e.message)) + ').' })]);
+      });
+    }
+
+    function draw(users) {
+      var week = Date.now() - 7 * 86400000, day = Date.now() - 86400000;
+      var rows = users.map(function (x) {
+        var s = normalize(x.data || {});
+        var c = 0, n = 0;
+        s.history.forEach(function (it) { c += it.c; n += it.n; });
+        return {
+          u: x, s: s, c: c, n: n,
+          tests: Object.keys(s.best).length,
+          wrong: Object.keys(s.wrong).length,
+          vids: VIDEOS.filter(function (_, i) { return s.video[i + 1] && s.video[i + 1].done; }).length
+        };
+      }).sort(function (a, b) { return b.u.updatedAt - a.u.updatedAt; });
+      var tot = rows.reduce(function (acc, r) { acc.c += r.c; acc.n += r.n; acc.sub += r.s.history.length; return acc; }, { c: 0, n: 0, sub: 0 });
+      var active7 = rows.filter(function (r) { return r.u.updatedAt >= week; }).length;
+      var active1 = rows.filter(function (r) { return r.u.updatedAt >= day; }).length;
+
+      var list = h('ol', { class: 'admin-users' });
+      rows.forEach(function (r) {
+        var pct = r.n ? Math.round(r.c / r.n * 100) : null;
+        var recent = h('ol', { class: 'history' });
+        r.s.history.slice(0, 15).forEach(function (x) { recent.appendChild(historyItem(x)); });
+        if (!r.s.history.length) recent.appendChild(h('li', { class: 'empty', text: 'Chưa nộp bài lần nào.' }));
+        list.appendChild(h('li', null, [h('details', { class: 'admin-user' }, [
+          h('summary', null, [
+            avatarEl({ name: r.u.name, email: r.u.email, photo: '' }),
+            h('div', { class: 'admin-user__who' }, [
+              h('b', { text: r.u.name || '(chưa đặt tên)' }),
+              h('small', { class: 'muted', text: r.u.email || r.u.uid })
+            ]),
+            h('div', { class: 'admin-user__nums' }, [
+              h('span', { title: 'Số lần nộp bài', text: r.s.history.length + ' lần nộp' }),
+              pct === null ? h('span', { class: 'muted', text: '–' }) : h('span', { class: pctClass(pct), text: pct + '%' }),
+              h('small', { class: 'muted', text: relTime(r.u.updatedAt) })
+            ])
+          ]),
+          h('div', { class: 'admin-user__more' }, [
+            h('p', { class: 'small muted' }, [
+              r.tests + '/' + TOTAL_TESTS + ' đề theo tuần · ' + r.wrong + ' câu sai đang lưu · ' + r.vids + '/' + VIDEOS.length + ' video xem hết' +
+              (r.u.updatedAt ? ' · hoạt động lần cuối ' + fmtDateTime(r.u.updatedAt) : '')
+            ]),
+            recent,
+            r.s.history.length > 15 ? h('p', { class: 'small muted', text: '… và ' + (r.s.history.length - 15) + ' lần cũ hơn.' }) : null
+          ])
+        ])]));
+      });
+      if (!rows.length) list.appendChild(h('li', { class: 'empty', text: 'Chưa có tài khoản nào.' }));
+
+      show([
+        h('div', { class: 'hstats' }, [
+          h('div', { class: 'stat' }, [h('b', { text: String(rows.length) }), h('span', { text: 'tài khoản' })]),
+          h('div', { class: 'stat' }, [h('b', { text: active1 + ' / ' + active7 }), h('span', { text: 'hoạt động 24 giờ / 7 ngày' })]),
+          h('div', { class: 'stat' }, [h('b', { text: String(tot.sub) }), h('span', { text: 'lần nộp bài' })]),
+          h('div', { class: 'stat' }, [h('b', { text: tot.n ? Math.round(tot.c / tot.n * 100) + '%' : '–' }), h('span', { text: 'tỉ lệ đúng chung' })])
+        ]),
+        h('div', { class: 'section-head', style: 'margin-top:24px' }, [
+          h('h2', { text: 'Danh sách (mới hoạt động trước)' }),
+          h('button', { type: 'button', class: 'btn btn--ghost btn--sm', onclick: load, text: '↻ Tải lại' })
+        ]),
+        list
+      ]);
+      animate(function () { G.from('.admin-body .stat', { y: 14, autoAlpha: 0, stagger: 0.06 }); });
+    }
+  }
+
   function pageHistory() {
     setTitle('Lịch sử làm bài'); setNav('');
     var hs = store.history;
@@ -1325,23 +1453,8 @@
     var testsDone = DATA.weeks.reduce(function (s, w) { return s + doneTests(w); }, 0);
     var vidsDone = VIDEOS.filter(function (_, i) { return store.video[i + 1] && store.video[i + 1].done; }).length;
     var u = Cloud && Cloud.user();
-    var fmt = function (t) {
-      var d = new Date(t);
-      var p = function (n) { return (n < 10 ? '0' : '') + n; };
-      return p(d.getHours()) + ':' + p(d.getMinutes()) + ' · ' + p(d.getDate()) + '/' + p(d.getMonth() + 1) + '/' + d.getFullYear();
-    };
     var list = h('ol', { class: 'history' });
-    hs.forEach(function (x) {
-      var pct = Math.round(x.c / x.n * 100);
-      list.appendChild(h('li', { class: 'history-item' }, [
-        h('span', { class: 'pct ' + (pct >= 80 ? 'is-good' : pct >= 50 ? 'is-mid' : 'is-low'), text: pct + '%' }),
-        h('div', { class: 'history-item__main' }, [
-          h('b', { text: x.title }),
-          h('small', { class: 'muted', text: fmt(x.t) + ' · ' + (x.mode === 'exam' ? 'Thi thử' : 'Luyện tập') })
-        ]),
-        h('span', { class: 'history-item__score', text: x.c + '/' + x.n })
-      ]));
-    });
+    hs.forEach(function (x) { list.appendChild(historyItem(x)); });
     if (!hs.length) list.appendChild(h('li', { class: 'empty', text: 'Chưa có lần làm bài nào. Nộp bài xong là kết quả sẽ hiện ở đây.' }));
 
     render([
@@ -1399,6 +1512,7 @@
       h('div', { class: 'account__who' }, [h('b', { text: u.name || 'Tài khoản' }), h('small', { text: u.email })]),
       h('a', { href: '#/history', text: '🕘 Lịch sử làm bài' }),
       h('a', { href: '#/wrong', text: '✗ Câu sai của bạn' }),
+      Cloud.isAdmin && Cloud.isAdmin() ? h('a', { href: '#/admin', text: '⚙ Quản trị' }) : null,
       h('button', { type: 'button', onclick: doSignOut, text: '↩ Đăng xuất' })
     ]);
     var btn = h('button', { type: 'button', class: 'account__btn', 'aria-expanded': 'false', 'aria-controls': 'account-menu', 'aria-label': 'Tài khoản: ' + (u.name || u.email) }, [
@@ -1489,6 +1603,7 @@
       case 'video': return pageVideo(parts[1]);
       case 'login': return pageLogin();
       case 'history': return pageHistory();
+      case 'admin': return pageAdmin();
       default: return pageNotFound();
     }
   }

@@ -1,8 +1,16 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
+    // Quản trị viên: chỉ được XEM dữ liệu của mọi người (không sửa/xoá). Email phải đã xác minh
+    // (tài khoản Google luôn xác minh), nên không ai đăng ký email/mật khẩu trùng địa chỉ này để giả mạo được.
+    function isAdmin() {
+      return request.auth != null
+        && request.auth.token.email_verified == true
+        && request.auth.token.email in ['nhien2k6@gmail.com'];
+    }
     // Mỗi người chỉ đọc/ghi được dữ liệu ôn tập của chính mình: users/{uid}
     match /users/{uid} {
+      allow read: if isAdmin();
       allow read, delete: if request.auth != null && request.auth.uid == uid;
       allow create, update: if request.auth != null && request.auth.uid == uid
         && request.resource.data.keys().hasOnly(['data', 'updatedAt', 'name', 'email'])

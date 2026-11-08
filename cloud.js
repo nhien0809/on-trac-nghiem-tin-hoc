@@ -76,6 +76,25 @@
   document.addEventListener('visibilitychange', function () { if (document.visibilityState === 'hidden') flush(); });
   window.addEventListener('pagehide', flush);
 
+  // ---- quản trị (chỉ xem). Quyền thật nằm ở firestore.rules; danh sách này chỉ để hiện/ẩn giao diện ----
+  var ADMINS = ['nhien2k6@gmail.com'];
+  function isAdmin() {
+    var u = auth && auth.currentUser;
+    return !!(u && u.emailVerified && ADMINS.indexOf((u.email || '').toLowerCase()) !== -1);
+  }
+  function listUsers() {
+    return db.collection('users').get().then(function (snap) {
+      return snap.docs.map(function (d) {
+        var x = d.data(), data = null;
+        try { data = JSON.parse(x.data); } catch (e) { /* bỏ qua bản hỏng */ }
+        return {
+          uid: d.id, name: x.name || '', email: x.email || '', data: data,
+          updatedAt: x.updatedAt && x.updatedAt.toMillis ? x.updatedAt.toMillis() : 0
+        };
+      });
+    });
+  }
+
   function load(uid) {
     return db.collection('users').doc(uid).get().then(function (snap) {
       if (!snap.exists) return null;
@@ -138,6 +157,7 @@
       if (state.ready) setTimeout(function () { fn(state.user); }, 0);
     },
     load: load, save: save, flush: flush,
+    isAdmin: isAdmin, listUsers: listUsers,
     signInGoogle: signInGoogle, signInEmail: signInEmail, signUpEmail: signUpEmail,
     resetPassword: resetPassword, signOut: signOut, message: message
   };
