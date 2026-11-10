@@ -238,7 +238,8 @@
   }
   function weekNum(w) { return w.label.replace(/^Tuần\s*/, '').replace(/\s*–\s*/, '–'); }
   function weekBadge(w) {
-    return h('div', { class: 'week__num', 'aria-hidden': 'true' }, [h('small', { text: 'Tuần' }), h('span', { text: weekNum(w) })]);
+    // Mục không theo tuần (vd. "Bộ tổng hợp XD") tự đặt nhãn qua w.tag / w.short.
+    return h('div', { class: 'week__num', 'aria-hidden': 'true' }, [h('small', { text: w.tag || 'Tuần' }), h('span', { text: w.short || weekNum(w) })]);
   }
   function levelCounts(ids) {
     var c = { NB: 0, TH: 0, VD: 0, x: 0 };
@@ -319,7 +320,7 @@
         tests,
         h('div', { class: 'week__foot' }, [
           h('span', { class: 'muted small', text: 'Đã làm ' + doneTests(w) + '/' + w.tests.length + ' đề' }),
-          h('a', { class: 'btn btn--ghost btn--sm', href: '#/start/' + w.id + '/all', text: 'Làm cả tuần (' + w.count + ' câu) →' })
+          h('a', { class: 'btn btn--ghost btn--sm', href: '#/start/' + w.id + '/all', text: (w.tag ? 'Làm cả bộ (' : 'Làm cả tuần (') + w.count + ' câu) →' })
         ])
       ]));
     });
@@ -417,7 +418,7 @@
     }
     var w = weekById[weekId];
     if (!w) return null;
-    if (testId === 'all') return { title: w.label + ' · Cả tuần', ids: w.ids.slice(), key: testKey(w.id, 'all'), week: w };
+    if (testId === 'all') return { title: w.label + (w.tag ? ' · Cả bộ' : ' · Cả tuần'), ids: w.ids.slice(), key: testKey(w.id, 'all'), week: w };
     var t = w.tests[parseInt(testId, 10) - 1];
     if (!t) return null;
     return { title: w.label + ' · Đề ' + testId, ids: t.slice(), key: testKey(w.id, testId), week: w };
