@@ -1,0 +1,399 @@
+# Bản văn bản của Google Doc "Tong_hop_cau_hoi_xd" (mỗi tab một tuần). Dùng cho tools/build_xd.py.
+# Đã bỏ định dạng in đậm; nội dung giữ nguyên.
+
+# Tuan 3
+
+(nhóm 1)
+
+Mức 1: Nhận biết (3 câu)
+
+Câu 1. Yêu cầu cần đạt của môn Tin học được xác định dựa trên những căn cứ nào sau đây?
+A. Cơ sở pháp lý, cơ sở lý luận và khoa học, cơ sở thực tiễn.
+B. Cơ sở pháp lý, cơ sở lý luận và khoa học, cơ sở xã hội.
+C. Cơ sở lý luận và khoa học, cơ sở xã hội, cơ sở thực tiễn.
+D. Cơ sở lý luận và khoa học, cơ sở thực tiễn, cơ sở kinh tế.
+Đáp án: A
+
+Câu 2. Thành phần năng lực Tin học nào dưới đây góp phần trực tiếp vào phát triển năng lực chung tương ứng?
+A. (NLd) Ứng dụng CNTT-TT trong học tập  Năng lực Tự chủ và tự học.
+B. (NLe) Hợp tác trong môi trường số  Năng lực Tự chủ và tự học.
+C. (NLc) Giải quyết vấn đề  Năng lực Giao tiếp và hợp tác.
+D. (NLd) Ứng dụng CNTT-TT trong học tập  Năng lực Giải quyết vấn đề và sáng tạo.
+Đáp án đúng: A
+
+Câu 3. Ba mạch kiến thức cốt lõi được tích hợp xuyên suốt trong chương trình môn Tin học là gì?
+A. DL (Học vấn số hoá phổ thông), ICT (Công nghệ thông tin và Truyền thông), CS (Khoa học máy tính).
+B. AI (Trí tuệ nhân tạo), ICT (Công nghệ thông tin), CS (Khoa học máy tính).
+C. DL (Học vấn số hóa), IoT (Internet kết nối vạn vật), CS (Khoa học máy tính).
+D. DL (Học vấn số hóa), ICT (Công nghệ thông tin), IT (Công nghệ phần mềm).
+Đáp án đúng: A
+
+Level 2: Understanding (4 questions)
+
+Câu 6: Sự kết hợp giữa 5 thành phần năng lực Tin học và các trụ cột giáo dục của UNESCO phản ánh định hướng nào của môn học?
+A. Hướng tới phát triển toàn diện, không chỉ truyền thụ kiến thức và kỹ năng nghề nghiệp mà còn rèn khả năng hợp tác và phát triển bản thân.
+B. Tập trung chủ yếu vào việc truyền thụ nội dung lý thuyết và khái niệm khoa học máy tính hướng tới làm chủ kiến thức lý thuyết.
+C. Định hướng nghề nghiệp theo hướng ứng dụng thực tiễn nhằm trang bị năng lực thích ứng, giúp học sinh nhanh chóng gia nhập thị trường lao động.
+D. Nâng cao nhận thức, chuẩn mực đạo đức và hình thành các quy tắc ứng xử văn minh tham gia giao tiếp trên không gian mạng.
+Đáp án đúng: A
+
+Level 3: Applying (3 questions)
+
+Câu 8: Khi thiết kế ma trận đề kiểm tra định kỳ nhằm đánh giá chính xác năng lực môn Tin học cho học sinh, chiến lược sư phạm nào là chuẩn xác nhất?
+A. Vận dụng nguyên tắc bám sát Yêu cầu cần đạt của Chương trình môn học làm thước đo chuẩn mực cốt lõi, chọn lọc các mạch kiến thức giao thoa đã học để xây dựng ma trận đánh giá năng lực.
+B. Vận dụng nguyên tắc tích hợp đồng bộ mạch kiến thức, chuẩn hóa ma trận đề theo các chỉ báo năng lực thành phần đã được quy định trong khung năng lực chung của chương trình giáo dục.
+C. Vận dụng lý thuyết kiểm tra đánh giá tiêu chí, lấy tập hợp các bài tập thực hành xuất hiện với tần suất cao nhất trong hệ thống học liệu chuẩn để biên soạn ma trận đề thi chung.
+D. Vận dụng nguyên tắc dạy học phân hóa đối tượng, thiết kế ma trận đánh giá dựa trên mức độ ưu tiên giữa các mạch kiến thức ứng dụng công nghệ và tư duy thuật toán chuyên sâu.
+Đáp án đúng: A
+
+Câu 10: Để giải quyết triệt để hiện tượng học sinh quá chú trọng vào hình thức sản phẩm mà coi nhẹ yêu cầu tư duy thuật toán trong dạy học dự án môn Tin học, giải pháp kỹ thuật sư phạm nào là tối ưu nhất?
+A. Vận dụng kỹ thuật đánh giá bằng tiêu chí (Rubric), thiết kế phiếu đánh giá tiến trình với trọng số điểm tập trung chủ yếu vào mức độ đáp ứng các Yêu cầu cần đạt cốt lõi.
+B. Vận dụng nguyên tắc quản lý hành vi học tập, xây dựng khung quy trình thực hành dự án có sự kiểm soát chặt chẽ đối với từng giai đoạn hình thành sản phẩm học tập của học sinh.
+C. Vận dụng nguyên tắc phân hóa nhiệm vụ học tập, tái cấu trúc hoạt động nhóm dựa trên sự tương thích giữa năng lực cá nhân và yêu cầu kỹ thuật chuyên biệt của dự án.
+D. Vận dụng lý thuyết kiến tạo phản hồi đồng đẳng, tổ chức các phiên đánh giá chéo giữa các nhóm để điều chỉnh định hướng sản phẩm bám sát theo chuẩn đầu ra môn học.
+Đáp án đúng: A
+
+(nhóm 3)
+
+Question 1 (Remember): According to the content orientation of the Informatics subject in the 2018 General Education Curriculum, which of the following serves as the theoretical and scientific basis for determining curriculum content?
+A. Directives, policy statements, and strategic guidelines issued by the Party and State on education reform.
+B. International research reports and framework documents on digital competence standards from educational organizations.
+C. Comprehensive feedback reports and consultative summaries compiled from national subject specialists and local teachers.
+D. Nationwide statistical surveys on existing hardware infrastructure, network connectivity, and computer laboratory equipment.
+Answer: B
+
+Question 3 (Remember): According to the 2018 General Education Curriculum for Informatics, what is the primary objective of differentiation in the Informatics subject at the Upper Secondary level?
+A. Career orientation for students.
+B. Skills for digital society growth.
+C. Thinking for device automation.
+D. Digital products for community.
+Answer: A
+
+Question 8 (Apply): An Informatics department aims to design an instructional plan so that the learning objective that students can ensure their safety in cyberspace is effectively reinforced during the school year. Which implementation option should the department choose?
+A. Combine theoretical safety concepts with practical application exercises directly within a dedicated unit on Digital Literacy strand.
+B. Integrate this learning objective across multiple educational content themes to allow students to practice it within diverse contexts.
+C. Combine the safety objective with programming and database objectives into a single comprehensive learning project at year-end.
+D. Decompose this objective into smaller learning components so that each component corresponds to a lesson within the instructional plan.
+Answer: B
+
+# Tuan 4
+
+(nhóm 1)
+
+Level 1: Remembering (3 questions)
+
+Question 1. What are the three official groups of bases for determining methods and assessment?
+A. Legal, Pedagogical and Empirical.
+B. Legal, Scientific and Practical.
+C. Legal, Psychological and Experimental.
+D. Theoretical, Pedagogical and Practical.
+Answer: B
+
+Question 3. Which teaching method plays the main role in the Applied Informatics orientation at the upper secondary level?
+A. Problem-based.
+B. Practical.
+C. Visual-experiental
+D. Concept-building.
+
+Question 8. Which instructional method best supports students in understanding ethical and cultural issues in the digital environment?
+A. Experiential learning where learners practice digital behavior through activities and reflect on the ethical consequences.
+B. Product-oriented learning where students perform digital tasks and reproduce outputs based on fixed ethical rules.
+C. Lecture-based learning where the teacher explains digital norms and students memorize key ethical guidelines.
+D. Situational learning where learners analyze digital cases of behavior and discuss the ethical responses.
+Answer: D
+
+Question 9. In what way can abstract Informatics concepts be delivered so learners actually understand them deeply?
+A. By applying visual models with practical examples that relate abstract concepts to direct tasks in learning.
+B. By using structured explanations with practical examples that connect abstract concepts to guided tasks in lessons.
+C. By designing repetitive tasks with practical examples that reinforce abstract concepts through recall in exercises.
+D. By facilitating peer discussions with practical examples that reinterpret abstract concepts into shared tasks in groups.
+Answer: A
+
+Question 10. How should assessment be applied in CS, DL, and ICT?
+A. Problem-solving abilities; behavioral patterns in digital contexts; transfer of knowledge in projects.
+B. Innovative and analytical skills; emotional responses in digital use; reporting of technology tasks.
+C. Logical and structured reasoning; online participation records; recall of technical concepts.
+D. Creative and systematic thinking; digital attitudes and behaviors; application in product creation.
+Answer: D
+
+Level 2: Understanding (4 questions)
+
+Question 4. Why are scenario-based learning and small project-based learning suitable for topic D?
+A. Creating opportunities for students to analyze real-world scenarios and cultivate appropriate digital habits.
+B. Create opportunities for students to develop habits of cultured behavior by memorizing cybersecurity rules.
+C. Help students analyze real-world problems to reduce the time spent on computer operations and in-class discussions.
+D. Through online simulation scenarios, students practice and develop habits of civilized online behavior.
+Answer: A
+
+(nhóm 3)
+
+Question 1 (Remember): According to 2018 General Education Curriculum for Informatics, how are the general orientation for differentiated teaching at the primary level described?
+A. Organizing diverse activities to encourage and nurture different abilities and interests in using computers.
+B. Helping students choose suitable optional topics, igniting their passion, and discovering their potential in computer science.
+C. Adopting teaching methods tailored to the specific characteristics of each educational orientation.
+D. Promoting project-based learning and problem-solving to integrate knowledge and create practical digital products.
+Answer: A
+
+Question 8 (Apply): When assigning a collaborative digital project, how can an Informatics teacher most effectively evaluate the individual level of participation of each group member?
+A. Require students to use digital tools that maintain revision histories to track individual editing contributions throughout the project.
+B. Assign students to complete peer evaluation rubrics upon project completion to assess member collaboration and individual group efforts.
+C. Instruct group leaders to submit structured task allocation reports documenting member responsibilities and ongoing project group progress.
+D. Utilize observational checklists during classroom practice sessions to monitor student interaction and active communication in group work.
+Answer: A
+
+Question 9 (Apply): When teaching a unit on the topic Computer networks and the Internet, how should a teacher apply educational methods under the 2018 General Education Curriculum for Informatics?
+A. Conduct lessons in computer labs with practical methods enabling students to interact with software and observe hardware devices.
+B. Organize lessons in theoretical classrooms with problem-solving methods enabling students to analyze abstract concepts and algorithmic principles.
+C. Implement project-based learning with collaborative methods enabling students to explore ethical standards and digital communication rules.
+D. Utilize experiential learning with career-oriented methods enabling students to explore technology jobs and future industry opportunities.
+Answer: A
+
+Question 10 (Apply): When teaching Informatics 9, a teacher notices that students show very different interests and potential in Informatics. Which of the following approaches should the teacher adopt to implement differentiated teaching in accordance with the 2018 General Education Curriculum for Informatics in this context?
+A. Offering a range of optional topics so each student can select one matching personal interest, develop enthusiasm, and discover individual potential in computer science.
+B. Organizing diverse activities that encourage and nurture the different abilities and interest pupils show when using computers, with every child trying several kinds of tasks.
+C. Moving lessons into the computer lab so learners operate software or observe hardware devices, because practical teaching suits the applied content of this subject well.
+D. Setting problem-based tasks that develop computational thinking, since such teaching methods are appropriate for many topics within the computer science orientation of the curriculum.
+Answer: A
+
+# Tuan 5
+
+1. Knowledge (30%)
+
+Question 1: What requirements must be met when developing a school's competency- and quality-oriented educational plan?
+A. Legality in developing the school's educational plan.
+B. Consistency and continuity in the curriculum structure.
+C. Feasibility and suitability to the school's practical context.
+D. Logic and comprehensiveness in developing learners' competencies.
+Answer: A.
+
+Question 2: How many steps are required in the process of developing a competency- and quality-oriented school educational plan for high schools?
+A. 5.
+B. 2.
+C. 3.
+D. 4.
+Answer: C.
+
+Question 3: What requirements must be ensured when developing and implementing a school educational plan to fulfill the general education curriculum?
+A. Flexible and suitable for the specific conditions of the locality.
+B. By adjusting lesson objectives to align with students' proficiency levels.
+C. Implemented independently and isolated from local practical realities.
+D. Uniform, maintaining all general regulations nationwide.
+Answer: A.
+
+2. Comprehension (40%)
+
+Question 5: Why is the school's educational plan considered the most important level within the general education curriculum framework?
+A. It is the document that guides the development of individual teaching and educational plans by each teacher.
+B. It helps maximize the initiative and creativity of subject departments in implementing the curriculum.
+C. It enhances the effectiveness and efficiency of managing teaching and educational activities carried out by teachers and the school.
+D. It demonstrates the exercise of teacher autonomy in implementing the educational curriculum.
+Answer: A.
+
+Question 6: For schools facing a shortage of facilities or subject-specific teachers, how should the timetable be structured to ensure flexibility for subjects with few scheduled periods?
+A. There is no need for instruction or lesson distribution to be spread out over the weeks.
+B. The subjects taught must be distributed throughout the entire academic year.
+C. The principal may arrange for subjects to appear more than once a week in the schedule.
+D. The number of class periods is equal for each week throughout the new school year.
+Answer: A.
+
+Question 7: What is the objective of educational activities such as field trips, camping, clubs, and community service when incorporated into a school’s educational plan?
+A. To make memorizing theoretical lessons easier and less tedious, while diversifying methods of learning.
+B. To create an environment for experiencing and applying learned knowledge and skills to real-life situations.
+C. To allow students to make friends and engage in group study to improve their academic grades.
+D. To provide additional experience in career orientation, thereby helping students take notes more effectively.
+Answer: B.
+
+3. Application (30%)
+
+Question 8: The school-based curriculum is considered the most important. Does this mean the school-based curriculum is more important than the 2018 General Education Curriculum?
+A. Incorrect, because the General Education Curriculum serves as the core foundation against which the school-based curriculum is referenced and adjusted.
+B. Incorrect, because the General Education Curriculum applies nationwide, whereas the school-based curriculum is limited to the scope of an individual school.
+C. Correct, because the school-based curriculum directly governs teaching and learning activities within the school and is refined to suit practical realities.
+D. Correct, because the school-based curriculum is developed following the issuance of the General Education Curriculum by the Ministry of Education.
+Answer: A.
+
+Question 9: School S’s computer lab has 25 computers, yet class 9B has 42 students. As a teacher, how would you manage the situation to make effective use of the available teaching equipment?
+A. Organize students into groups of 2–3, with each group sharing one computer.
+B. Have students take turns using the computers, with one group following another.
+C. Conduct theory lessons in the classroom, then have students complete practical work at home and submit their results.
+D. Divide the class into two halves: one half studies theory in the classroom, while the other half works in the computer lab.
+Answer: A.
+
+Question 10: Parents have the right to participate in the design and implementation of a school's educational plan. Does this mean they have the right to edit lesson plans and instructional content?
+A. No, they do not have the authority to intervene in professional/pedagogical matters or to unilaterally modify lessons.
+B. Yes, they may add relevant content if it is not already included in the lesson plan.
+C. Yes, they have the right to make edits if they find the lesson content unsuitable for their child.
+D. No, they may only make edits regarding extracurricular activities and career guidance activities.
+Answer: A.
+
+# Tuan 6
+
+(nhóm 1)
+
+Level 1: Remembering (3 questions)
+
+Question 2. Which of the following is not a requirement when developing an educational plan for a subject team?
+A. Ensure legal compliance.
+B. Ensure feasibility.
+C. Ensure entertainment value.
+D. Ensure flexibility.
+Answer: C
+
+Question 3. What requirements must be met when developing an educational plan for a specialized subject department?
+A. Legality, feasibility, logic, and flexibility
+B. Legality, scientific soundness, practicality, and flexibility
+C. Feasibility, logic, flexibility, and creativity
+D. Legality, feasibility, practicality, and effectiveness
+Answer: A
+
+Level 2: Understanding (4 questions)
+
+Question 4. What feature allows for the adjustment of a plan when the actual situation changes?
+A. Ensure legal compliance.
+B. Ensure feasibility.
+C. Ensure logical consistency.
+D. Ensure flexibility.
+Answer: D
+
+Question 6. The Informatics Department has finalized the curriculum distribution (pacing guide) for Grade 10 Informatics. Later, when planning a field trip to a software company, the department needs to reschedule the trip to a different week, which requires adjusting the number of periods allocated to certain lessons in the previously established curriculum distribution. How should this revision of the curriculum distribution be interpreted?
+A. Inappropriate, because once a curriculum distribution is finalized, it must remain unchanged when planning specific activities.
+B. Inappropriate, because once a curriculum distribution is finalized, only the Principal is authorized to make adjustments.
+C. Appropriate, because the planning process involves multiple interconnected tasks, meaning different components may influence one another.
+D. Appropriate, but it requires written approval from the Department of Education before any established content can be modified.
+Answer: C
+
+(nhóm 2)
+
+1. Knowledge (30%)
+
+Question 3: According to the regulations on developing a professional department’s educational plan, who has the authority and responsibility to approve the plan for an academic year, serving as the basis for teachers to follow?
+A. School Party Secretary.
+B. Vice Principal.
+C. Head of the professional department.
+D. Principal.
+Answer: D
+
+2. Comprehension (40%)
+
+Question 4: What is the main purpose of a professional group's educational planning?
+A. Helps unify the teaching content across the school and provides a basis for assigning specific tasks to teachers and students.
+B. Ensures consistency in implementing the curriculum and serves as a basis for evaluating individual professional competence.
+C. Guaranteeing the consistency in implementing the school's plan and serve as a basis for monitoring, urging, and evaluating the effectiveness of the work.
+D. Guides the implementation of the school year's tasks and serves as a basis for individuals to develop reasonable lesson plans.
+Answer: C.
+
+Question 7: During the development of an educational plan by a specialized department (subject group), the process of analyzing student competencies, the number and quality of teachers, and existing facilities-while specifically accounting for the variations and nuances among these factors - ensures which requirement for the department’s educational plan is met?
+A. Ensuring legal compliance.
+B. Ensuring feasibility.
+C. Ensuring logical consistency.
+D. Ensuring flexibility.
+Answer: B.
+
+3. Application (30%)
+
+Question 8: In the new academic year, School A included a provision in its subject department’s plan for students to use the computer lab; however, the computer room is currently undergoing maintenance and is unavailable for use. In this situation, which requirement for the development of a subject department’s plan has been violated?
+A. Ensuring legal compliance.
+B. Ensuring feasibility.
+C. Ensuring logical consistency.
+D. Ensuring flexibility.
+Answer: B.
+
+Question 10: In the event of a conflict between the available school equipment identified during Step 1: “Analyzing the situational context” and the number of instructional hours proposed in Step 2: “Developing the teaching plan,” how should the professional department (subject-specific teaching team) address the issue?
+A. Schedule practical sessions in shifts, utilize external learning tools, or adjust the curriculum distribution.
+B. Maintain the original number of instructional hours and require students to provide their own learning equipment.
+C. Eliminate all lessons that require the use of a computer lab to avoid overloading the school’s facilities.
+D. Convert all practical content into theoretical instruction without adjusting the curriculum distribution.
+Answer: A.
+
+# Tuan 7
+
+(nhóm 1)
+
+Question 1 (Remember): When developing a lesson plan to ensure the effective organization of the teaching and learning process, how should the plan be structured in terms of a sequence of activities?
+A. Reviewing previous material, presenting new content, consolidating, and providing assignments.
+B. Posing a problem, knowledge construction, practice, and application.
+C. Assigning tasks, executing tasks, reporting and discussion, and summarizing.
+D. Warm-up, group discussion, presentation, and grading.
+Answer: B
+
+Question 2 (Remember): Arrange the following steps to form a complete process for developing a lesson plan:
+(1) Determine the sequence of learning activities and the objectives for each activity.
+(2) Define the lesson objectives.
+(3) Finalize the lesson plan.
+(4) Develop specific teaching and learning activities.
+A. 2-1-4-3.
+B. 1-2-4-3.
+C. 1-2-3-4.
+D. 2-1-3-4.
+Answer: A
+
+Question 5 (Understand): Why is it said that a lesson plan plays a crucial role in the success of a lesson?
+A. It establishes an environment that makes teaching and learning effective, while also enhancing the teacher's instructional skills.
+B. It helps teachers anticipate most potential worst-case scenarios during the teaching process and take steps to prevent them.
+C. It defines the scope of knowledge to be covered within a given timeframe, allowing students to learn the theory as effectively as possible.
+D. It facilitates the teacher's assessment of students following the delivery of theoretical instruction in the classroom.
+Answer: A
+
+Question 6 (Understand): When developing a lesson plan, a teacher anticipates that students may not yet have mastered the foundational knowledge required for the new lesson. Therefore, the teacher organized additional activities to review the previous lesson. What role does this play in lesson planning?
+A. Effectively utilizing existing knowledge.
+B. Developing skills for acquiring new knowledge.
+C. Establishing a pedagogical mindset.
+D. Making effective use of time.
+Answer: A
+
+Question 7 (Understand): When developing a lesson plan, which of the following demonstrates the teacher’s guiding role and the students’ active engagement in learning?
+A. Focusing on assigning tasks for students to complete, rather than concentrating on the teacher’s own activities.
+B. Employing teaching methods and techniques that activate student learning, tailored to the specific characteristics of the subject.
+C. Ensuring the coherence of the sequence of learning activities, as well as the alignment of the various components within each individual learning activity.
+D. Ensuring that the lesson plan remains flexible enough to be adapted to the learners' proficiency levels.
+Answer: A
+
+Question 8 (Apply): When developing a lesson plan on the “for” loop, a teacher focuses on explaining its syntax and usage, uses a question-and-answer format to avoid one-way lecturing, and then organizes a practice session where students complete exercises from the textbook. In this scenario, what requirement for lesson planning did the teacher fail to meet?
+A. The requirement to ensure a structured progression of teaching and learning activities.
+B. The requirement to demonstrate the teacher's guiding role and the students' active participation in learning.
+C. The requirement for the appropriateness of equipment and learning materials in relation to the school's conditions.
+D. The requirement to align with the objectives of the 2018 General Education Curriculum.
+Answer: A
+
+(nhóm 3)
+
+Level I : Remembering
+
+Question 1: The objectives section in the structure for a lesson plan consists of three sub-sections, the first is “Required Outcomes”. What are the other two?
+A. Knowledge and skills.
+B. Competencies and attitudes.
+C. Competencies and qualities.
+D. Knowledge and qualities.
+Answer: C
+
+Question 2: When preparing lesson plans, teachers often include specific questions to ask after students have presented their work, in order to assess whether the students truly understand the lesson content. At which stage of a learning activity do these questions typically appear?
+A. Reporting and discussion.
+B. Carrying out the task.
+C. Assigning the task.
+D. Conclusion and assessment.
+Answer: A
+
+Question 3: In a lesson plan, every learning activity includes a "Content" section. What does this section consist of?
+A. The knowledge that the teacher summarizes at the end of an activity for students to record in their notebooks.
+B. The results produced by students upon completing an assigned learning task.
+C. The list of equipment and learning materials that the teacher intends to use during the activity.
+D. The task assigned by the teacher—such as questions, exercises, or scenarios—when presenting the assignment.
+Answer: D
+
+Level II : Understanding
+
+Question 7: During a lesson, the teacher notices that the entire class is struggling with the programming component, so they allow more time for it than originally planned, subsequently shortening the practice section that follows. What justifies the teacher’s decision to do this?
+A. For every activity that might pose difficulties, a separate, additional lesson period should be set aside.
+B. The lesson plan serves as a guide that can be adjusted based on how the lesson unfolds and the students' needs.
+C. The value of a lesson plan lies in ensuring that the actual time spent on each activity matches the planned duration.
+D. The material be revised and approved by the specialized team before the teacher continues teaching.
+Answer: B
+
+Level III : Applying
+
+Question 10: In an activity involving writing a sequential search program, the teacher anticipates that many groups might forget to include a command to terminate the loop once the target index has been found. What should the teacher include in the section detailing the implementation of this activity?
+A. Anticipated challenges (such as forgetting the termination command), suggested prompts for support, and various levels of task completion.
+B. A list of groups to be called upon for presentations, along with follow-up questions the teacher might ask them.
+C. A complete sample program that the teacher can distribute to groups that are unable to finish the task on their own.
+D. The grading criteria for the program, which are communicated to the students before they begin the task.
+Answer: A

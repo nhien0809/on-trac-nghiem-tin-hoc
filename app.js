@@ -214,7 +214,7 @@
   function levelTag(level) {
     return level ? h('span', { class: 'tag tag--' + level, text: LEVEL_NAME[level] || level }) : null;
   }
-  function sourcesText(q) { return 'Nguồn: Nhóm ' + q.sources.join(', '); }
+  function sourcesText(q) { return q.sources && q.sources.length ? 'Nguồn: Nhóm ' + q.sources.join(', ') : 'Nguồn: tài liệu tổng hợp'; }
 
   // Giải thích tham khảo (data/explanations.js). collapsed = dạng thu gọn (ngân hàng câu hỏi).
   var EXPLAIN = window.QUIZ_EXPLAIN || {};
