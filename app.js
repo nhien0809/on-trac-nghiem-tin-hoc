@@ -272,41 +272,17 @@
   // ---------- pages ----------
   function pageHome() {
     setTitle(''); setNav('home');
-    var total = DATA.questions.length;
-    var done = DATA.weeks.reduce(function (s, w) { return s + doneTests(w); }, 0);
-    var frac = TOTAL_TESTS ? done / TOTAL_TESTS : 0;
-    var who = Cloud && Cloud.user() ? Cloud.user().name || 'bạn' : '';
 
     var hero = h('section', { class: 'hero', 'aria-labelledby': 'hero-title' }, [
       h('div', null, [
         h('span', { class: 'eyebrow', text: 'Ôn trắc nghiệm · Chương trình GDPT 2018' }),
         h('h1', { id: 'hero-title', html: 'Tin học <em>GDPT 2018</em>' }),
-        h('p', { class: 'lead', text: 'Ngân hàng ' + total + ' câu hỏi kèm giải thích, chia theo chuyên đề và tuần. Mỗi tuần có các đề ngắn — làm hết là đã ôn đủ mọi câu.' }),
         h('div', { class: 'actions' }, [
           h('a', { class: 'btn btn--primary', href: '#/start/' + DATA.weeks[0].id + '/1', text: '▶ Bắt đầu ôn tập' }),
           h('a', { class: 'btn', href: '#/start/mix', text: '⤮ Đề ngẫu nhiên' }),
           h('a', { class: 'btn btn--ghost', href: '#/videos', text: '▷ Video' })
         ])
-      ]),
-      h('div', { class: 'progress-card' }, [
-        h('div', { class: 'progress-card__top' }, [h('span', { text: who ? 'Tiến độ của ' + who : 'Tiến độ cá nhân' }), h('a', { href: '#/history', text: 'Chi tiết' })]),
-        h('div', { class: 'progress-card__num' }, [
-          h('span', null, [h('b', { 'data-count': String(done), text: String(done) }), h('small', { text: '/' + TOTAL_TESTS + ' đề' })]),
-          h('span', { class: 'pill pill--pink', text: Math.round(frac * 100) + '%' })
-        ]),
-        h('div', { class: 'meter', role: 'progressbar', 'aria-label': 'Số đề đã làm', 'aria-valuemin': '0', 'aria-valuemax': String(TOTAL_TESTS), 'aria-valuenow': String(done) }, [
-          h('span', { style: 'transform:scaleX(' + frac + ')' })
-        ])
       ])
-    ]);
-    function kpi(label, n, sub) {
-      return h('div', { class: 'kpi' }, [h('span', { text: label }), h('b', { 'data-count': String(n), text: String(n) }), h('small', { text: sub })]);
-    }
-    var kpis = h('div', { class: 'kpis' }, [
-      kpi('Ngân hàng câu', total, 'câu hỏi không trùng'),
-      kpi('Tài liệu gốc', DATA.meta.rawCount, 'câu trước khi gộp trùng'),
-      kpi('Nhóm đóng góp', DATA.meta.groups, 'nhóm biên soạn'),
-      kpi('Bộ đề', TOTAL_TESTS, 'đề ôn theo tuần')
     ]);
 
     // Mục lục: mỗi nhóm tài liệu (Tuần 1–7, Tổng hợp XD, mỗi học phần riêng) là một thẻ; bấm thẻ mới hiện các tuần của nhóm.
@@ -361,11 +337,7 @@
         h('span', { class: 'toc-card__desc', text: g.desc }),
         h('span', { class: 'toc-card__foot' }, [h('span', { text: nQ + ' câu · ' + nT + ' đề' }), h('b', { text: nDone + '/' + nT + ' đề' })])
       ])]));
-      var panel = h('section', { class: 'toc-panel', id: 'grp-' + g.id, 'aria-labelledby': 'grp-title-' + g.id }, [
-        h('div', { class: 'section-head' }, [
-          h('h2', { id: 'grp-title-' + g.id }, [g.icon + ' ' + g.name + ' ', h('span', { class: 'pill', text: g.weeks.length + ' mục' })]),
-          h('button', { type: 'button', class: 'btn btn--ghost btn--sm', text: 'Thu gọn ✕', onclick: function () { toggleGroup(g.id); } })
-        ]),
+      var panel = h('section', { class: 'toc-panel', id: 'grp-' + g.id, 'aria-label': g.name }, [
         lists[i]
       ]);
       if (!open) panel.hidden = true;
@@ -427,7 +399,6 @@
 
     render([
       hero,
-      kpis,
       h('div', { class: 'section-head' }, [h('h2', { text: 'Chuyên đề học tập' }), h('span', { class: 'pill', text: groups.length + ' nhóm nội dung' })]),
       h('ul', { class: 'toc' }, cards),
       h('div', { class: 'home-cols' }, [h('div', null, [placeholder].concat(panels)), side])
@@ -436,11 +407,7 @@
     animate(function () {
       var tl = G.timeline();
       tl.from('.hero .eyebrow, .hero h1, .hero .lead, .hero .actions', { y: 22, autoAlpha: 0, stagger: 0.08, duration: 0.7 })
-        .from('.progress-card, .kpi', { y: 18, autoAlpha: 0, scale: 0.96, stagger: 0.06, duration: 0.6 }, '<0.2')
-        .from('.meter > span', { scaleX: 0, duration: 1.1, ease: 'power2.out' }, '<0.3');
-      app.querySelectorAll('[data-count]').forEach(function (el) {
-        tl.add(countUp(el, parseInt(el.getAttribute('data-count'), 10)), 0.35);
-      });
+      ;
       G.from('.section-head', { y: 14, autoAlpha: 0, delay: 0.3 });
     });
     revealOnScroll(Array.prototype.slice.call(app.querySelectorAll('.toc-panel:not([hidden]) .week, .side-card')));
