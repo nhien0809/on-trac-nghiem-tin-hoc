@@ -118,7 +118,7 @@
     if (chosen === null || chosen === undefined) return;
     if (chosen !== q.answer) {
       var prev = store.wrong[q.id];
-      store.wrong[q.id] = { n: (prev ? prev.n : 0) + 1, t: Date.now() };
+      store.wrong[q.id] = { n: (prev ? prev.n : 0) + 1, t: Date.now(), c: chosen }; // c: phương án chọn sai gần nhất (chỉ số gốc)
     } else if (store.wrong[q.id]) {
       delete store.wrong[q.id];
     }
@@ -249,6 +249,17 @@
     // Mục không theo tuần (vd. "Bộ tổng hợp XD") tự đặt nhãn qua w.tag / w.short.
     return h('div', { class: 'week__num', 'aria-hidden': 'true' }, [h('small', { text: w.tag || 'Tuần' }), h('span', { text: w.short || weekNum(w) })]);
   }
+  function pad2(n) { return (n < 10 ? '0' : '') + n; }
+  function weekPill(w) {
+    return h('span', { class: 'pill ' + (w.section ? 'pill--blue' : w.tag ? 'pill--purple' : 'pill--pink'), text: (w.tag || 'Tuần') + ' ' + (w.short || weekNum(w)) });
+  }
+  function testBtn(w, i) {
+    var key = testKey(w.id, i + 1);
+    return h('a', { class: 'test-btn' + (store.best[key] ? ' is-done' : ''), href: '#/start/' + w.id + '/' + (i + 1) }, [
+      h('span', { text: 'Đề ' + (i + 1) + ' (' + w.tests[i].length + ' câu)' }),
+      bestBadge(key) || h('small', { text: 'Chưa làm' })
+    ]);
+  }
   function levelCounts(ids) {
     var c = { NB: 0, TH: 0, VD: 0, x: 0 };
     ids.forEach(function (id) { var l = byId[id].level; if (c[l] !== undefined) c[l]++; else c.x++; });
@@ -264,36 +275,38 @@
     var total = DATA.questions.length;
     var done = DATA.weeks.reduce(function (s, w) { return s + doneTests(w); }, 0);
     var frac = TOTAL_TESTS ? done / TOTAL_TESTS : 0;
+    var who = Cloud && Cloud.user() ? Cloud.user().name || 'bạn' : '';
 
     var hero = h('section', { class: 'hero', 'aria-labelledby': 'hero-title' }, [
-      h('span', { class: 'blob blob--1', 'aria-hidden': 'true' }),
-      h('span', { class: 'blob blob--2', 'aria-hidden': 'true' }),
-      h('span', { class: 'blob blob--3', 'aria-hidden': 'true' }),
       h('div', null, [
-        h('span', { class: 'eyebrow', text: '✿ Học phần Tin học · GDPT 2018' }),
-        h('h1', { id: 'hero-title', html: 'Ôn trắc nghiệm <em>theo tuần</em>' }),
-        h('p', { class: 'lead', text: 'Phân tích chương trình và xây dựng kế hoạch dạy học môn Tin học. Mỗi tuần chia thành các đề ngắn — làm hết các đề là đã ôn đủ mọi câu của tuần.' }),
+        h('span', { class: 'eyebrow', text: 'Ôn trắc nghiệm · Chương trình GDPT 2018' }),
+        h('h1', { id: 'hero-title', html: 'Tin học <em>GDPT 2018</em>' }),
+        h('p', { class: 'lead', text: 'Ngân hàng ' + total + ' câu hỏi kèm giải thích, chia theo chuyên đề và tuần. Mỗi tuần có các đề ngắn — làm hết là đã ôn đủ mọi câu.' }),
         h('div', { class: 'actions' }, [
-          h('a', { class: 'btn btn--primary', href: '#/start/' + DATA.weeks[0].id + '/1', text: 'Bắt đầu ' + DATA.weeks[0].label }),
-          h('a', { class: 'btn', href: '#/start/mix', text: 'Đề tổng hợp' }),
-          h('a', { class: 'btn btn--ghost', href: '#/videos', text: '▶ Video bài giảng' })
+          h('a', { class: 'btn btn--primary', href: '#/start/' + DATA.weeks[0].id + '/1', text: '▶ Bắt đầu ôn tập' }),
+          h('a', { class: 'btn', href: '#/start/mix', text: '⤮ Đề ngẫu nhiên' }),
+          h('a', { class: 'btn btn--ghost', href: '#/videos', text: '▷ Video' })
         ])
       ]),
-      h('div', { class: 'hero-stats' }, [
-        h('div', { class: 'stat' }, [h('b', { 'data-count': String(total), text: String(total) }), h('span', { text: 'câu hỏi không trùng' })]),
-        h('div', { class: 'stat' }, [h('b', { 'data-count': String(DATA.meta.rawCount), text: String(DATA.meta.rawCount) }), h('span', { text: 'câu trong tài liệu gốc' })]),
-        h('div', { class: 'stat' }, [h('b', { 'data-count': String(DATA.meta.groups), text: String(DATA.meta.groups) }), h('span', { text: 'nhóm đóng góp' })]),
-        h('div', { class: 'stat' }, [h('b', { 'data-count': String(TOTAL_TESTS), text: String(TOTAL_TESTS) }), h('span', { text: 'đề theo tuần' })]),
-        h('div', { class: 'stat stat--wide' }, [
-          h('div', { class: 'stat__row' }, [
-            h('span', { text: 'Tiến độ' + (Cloud && Cloud.user() ? ' của ' + (Cloud.user().name || 'bạn') : ' của bạn') + ': ' + done + '/' + TOTAL_TESTS + ' đề đã làm' }),
-            h('a', { href: '#/history', text: 'Lịch sử →' })
-          ]),
-          h('div', { class: 'meter', role: 'progressbar', 'aria-label': 'Số đề đã làm', 'aria-valuemin': '0', 'aria-valuemax': String(TOTAL_TESTS), 'aria-valuenow': String(done) }, [
-            h('span', { style: 'transform:scaleX(' + frac + ')' })
-          ])
+      h('div', { class: 'progress-card' }, [
+        h('div', { class: 'progress-card__top' }, [h('span', { text: who ? 'Tiến độ của ' + who : 'Tiến độ cá nhân' }), h('a', { href: '#/history', text: 'Chi tiết' })]),
+        h('div', { class: 'progress-card__num' }, [
+          h('span', null, [h('b', { 'data-count': String(done), text: String(done) }), h('small', { text: '/' + TOTAL_TESTS + ' đề' })]),
+          h('span', { class: 'pill pill--pink', text: Math.round(frac * 100) + '%' })
+        ]),
+        h('div', { class: 'meter', role: 'progressbar', 'aria-label': 'Số đề đã làm', 'aria-valuemin': '0', 'aria-valuemax': String(TOTAL_TESTS), 'aria-valuenow': String(done) }, [
+          h('span', { style: 'transform:scaleX(' + frac + ')' })
         ])
       ])
+    ]);
+    function kpi(label, n, sub) {
+      return h('div', { class: 'kpi' }, [h('span', { text: label }), h('b', { 'data-count': String(n), text: String(n) }), h('small', { text: sub })]);
+    }
+    var kpis = h('div', { class: 'kpis' }, [
+      kpi('Ngân hàng câu', total, 'câu hỏi không trùng'),
+      kpi('Tài liệu gốc', DATA.meta.rawCount, 'câu trước khi gộp trùng'),
+      kpi('Nhóm đóng góp', DATA.meta.groups, 'nhóm biên soạn'),
+      kpi('Bộ đề', TOTAL_TESTS, 'đề ôn theo tuần')
     ]);
 
     // Mục lục: mỗi nhóm tài liệu (Tuần 1–7, Tổng hợp XD, mỗi học phần riêng) là một thẻ; bấm thẻ mới hiện các tuần của nhóm.
@@ -303,92 +316,54 @@
       var list = lists[groups.indexOf(groupOf(w, groups))];
       var c = levelCounts(w.ids);
       var vids = VIDEOS.filter(function (v) { return v.week === w.id; });
-      var tests = h('div', { class: 'week__tests' });
-      w.tests.forEach(function (ids, i) {
-        var key = testKey(w.id, i + 1);
-        tests.appendChild(h('a', { class: 'test-btn' + (store.best[key] ? ' is-done' : ''), href: '#/start/' + w.id + '/' + (i + 1) }, [
-          h('span', { class: 'test-btn__top' }, ['Đề ' + (i + 1), bestBadge(key)]),
-          h('small', { text: ids.length + ' câu' })
-        ]));
-      });
       list.appendChild(h('li', { class: 'week' }, [
-        h('div', { class: 'week__head' }, [
-          weekBadge(w),
-          h('div', null, [
-            h('h3', { class: 'week__title', text: w.title }),
-            h('div', { class: 'week__meta', text: w.count + ' câu · ' + w.tests.length + ' đề · ' + c.NB + ' NB · ' + c.TH + ' TH · ' + c.VD + ' VD' })
-          ])
+        h('div', { class: 'week__top' }, [
+          weekPill(w),
+          h('span', { text: w.count + ' câu hỏi · ' + w.tests.length + ' đề' }),
+          h('span', { class: 'week__levels', text: 'NB: ' + c.NB + ' · TH: ' + c.TH + ' · VD: ' + c.VD })
         ]),
+        h('h3', { class: 'week__title', text: w.title }),
         vids.length ? h('div', { class: 'week__videos' }, vids.map(function (v) {
           var n = VIDEOS.indexOf(v) + 1;
           var st = videoState(n);
           return h('a', { class: 'vid-link' + (st ? ' ' + st.cls : ''), href: '#/video/' + n }, [
             h('span', { class: 'vid-link__play', 'aria-hidden': 'true', text: st && st.cls === 'is-done' ? '✓' : '▶' }),
             h('span', { class: 'vid-link__title', text: 'Video ' + n + ' · ' + v.title }),
-            h('small', { text: fmtTime(v.dur) })
+            h('small', { text: st ? st.text : fmtTime(v.dur) })
           ]);
         })) : null,
-        tests,
+        h('div', { class: 'week__tests' }, w.tests.map(function (_, i) { return testBtn(w, i); })),
         h('div', { class: 'week__foot' }, [
           h('span', { class: 'muted small', text: 'Đã làm ' + doneTests(w) + '/' + w.tests.length + ' đề' }),
-          h('a', { class: 'btn btn--ghost btn--sm', href: '#/start/' + w.id + '/all', text: (w.tag ? 'Làm cả bộ (' : 'Làm cả tuần (') + w.count + ' câu) →' })
+          h('a', { class: 'btn btn--primary btn--sm', href: '#/start/' + w.id + '/all', text: (w.tag ? 'Làm cả bộ (' : 'Làm cả tuần (') + w.count + ' câu)' })
         ])
       ]));
     });
 
-    var nWrong = wrongIds().length;
-    var extras = h('div', { class: 'extras' }, [
-      h('section', { class: 'panel panel--accent mix', 'aria-labelledby': 'mix-title' }, [
-        h('div', null, [
-          h('h2', { id: 'mix-title', text: 'Đề tổng hợp ngẫu nhiên' }),
-          h('p', { class: 'muted', style: 'margin:0', text: 'Tự chọn số câu và các tuần muốn ôn; câu hỏi được lấy ngẫu nhiên.' })
-        ]),
-        h('div', { class: 'actions' }, [
-          h('a', { class: 'btn btn--primary', href: '#/start/mix', text: 'Tạo đề tổng hợp' })
-        ])
-      ]),
-      h('section', { class: 'panel mix', 'aria-labelledby': 'wrong-title' }, [
-        h('div', null, [
-          h('h2', { id: 'wrong-title' }, ['Câu sai của bạn ', h('span', { class: 'count-pill' + (nWrong ? '' : ' is-zero'), text: String(nWrong) })]),
-          h('p', { class: 'muted', style: 'margin:0', text: nWrong
-            ? 'Xem lại đáp án và làm lại những câu đã trả lời sai. Trả lời đúng thì câu tự rời khỏi danh sách.'
-            : 'Chưa có câu sai nào. Câu bạn trả lời sai sẽ tự được lưu vào đây để ôn lại.' })
-        ]),
-        h('div', { class: 'actions' }, [
-          h('a', { class: 'btn' + (nWrong ? ' btn--primary' : ''), href: '#/wrong', text: 'Xem lại câu sai' }),
-          nWrong ? h('a', { class: 'btn', href: '#/start/wrong', text: 'Làm lại' }) : null
-        ])
-      ])
-    ]);
-
-    var vgrid = h('ul', { class: 'vgrid' }, VIDEOS.map(function (v, i) { return videoCard(v, i + 1); }));
-
     var openId = readOpenGroup();
     if (!groups.some(function (g) { return g.id === openId; })) openId = null;
-    var cards = [], panels = [];
+    var cards = [], pills = [], panels = [];
+    var placeholder = h('div', { class: 'toc-empty', text: '☝ Chọn một chuyên đề ở trên để xem các tuần và đề ôn.' });
+    if (openId) placeholder.hidden = true;
     groups.forEach(function (g, i) {
       var nQ = g.weeks.reduce(function (n, w) { return n + w.count; }, 0);
       var nT = g.weeks.reduce(function (n, w) { return n + w.tests.length; }, 0);
       var nDone = g.weeks.reduce(function (n, w) { return n + doneTests(w); }, 0);
       var open = g.id === openId;
+      pills.push(h('span', { class: 'pill' + (open ? ' pill--pink' : ''), text: open ? 'Đang xem' : g.tag }));
       cards.push(h('li', null, [h('button', {
         type: 'button', class: 'toc-card' + (open ? ' is-open' : ''), id: 'toc-' + g.id,
         'aria-expanded': String(open), 'aria-controls': 'grp-' + g.id,
         onclick: function () { toggleGroup(g.id); }
       }, [
-        h('span', { class: 'toc-card__icon', 'aria-hidden': 'true', text: g.icon }),
-        h('span', { class: 'toc-card__body' }, [
-          h('span', { class: 'toc-card__name', text: g.name }),
-          h('span', { class: 'toc-card__desc', text: g.desc }),
-          h('span', { class: 'toc-card__meta', text: nQ + ' câu · ' + nT + ' đề' }),
-          h('span', { class: 'meter toc-card__meter', 'aria-hidden': 'true' }, [h('span', { style: 'transform:scaleX(' + (nT ? nDone / nT : 0) + ')' })]),
-          h('span', { class: 'toc-card__done', text: 'Đã làm ' + nDone + '/' + nT + ' đề' })
-        ]),
-        h('span', { class: 'toc-card__chev', 'aria-hidden': 'true', text: '›' })
+        h('span', { class: 'toc-card__top' }, [h('span', { class: 'toc-card__icon', 'aria-hidden': 'true', text: g.icon }), pills[i]]),
+        h('span', { class: 'toc-card__name', text: g.name }),
+        h('span', { class: 'toc-card__desc', text: g.desc }),
+        h('span', { class: 'toc-card__foot' }, [h('span', { text: nQ + ' câu · ' + nT + ' đề' }), h('b', { text: nDone + '/' + nT + ' đề' })])
       ])]));
       var panel = h('section', { class: 'toc-panel', id: 'grp-' + g.id, 'aria-labelledby': 'grp-title-' + g.id }, [
         h('div', { class: 'section-head' }, [
-          h('h2', { id: 'grp-title-' + g.id, text: g.icon + ' ' + g.name }),
+          h('h2', { id: 'grp-title-' + g.id }, [g.icon + ' ' + g.name + ' ', h('span', { class: 'pill', text: g.weeks.length + ' mục' })]),
           h('button', { type: 'button', class: 'btn btn--ghost btn--sm', text: 'Thu gọn ✕', onclick: function () { toggleGroup(g.id); } })
         ]),
         lists[i]
@@ -400,59 +375,82 @@
     function toggleGroup(id) {
       var next = openId === id ? null : id;
       openId = next; saveOpenGroup(next);
+      placeholder.hidden = !!next;
       groups.forEach(function (g, i) {
         var on = g.id === next;
         var card = document.getElementById('toc-' + g.id);
         card.classList.toggle('is-open', on);
         card.setAttribute('aria-expanded', String(on));
+        pills[i].className = 'pill' + (on ? ' pill--pink' : '');
+        pills[i].textContent = on ? 'Đang xem' : g.tag;
         panels[i].hidden = !on;
       });
       if (!next) return;
       var panel = panels[groups.map(function (g) { return g.id; }).indexOf(next)];
-      var weeks = panel.querySelectorAll('.week');
       if (motionOK()) {
-        G.fromTo(weeks, { autoAlpha: 0, y: 18 }, { autoAlpha: 1, y: 0, stagger: 0.05, duration: 0.45, overwrite: true, clearProps: 'transform,opacity,visibility' });
+        G.fromTo(panel.querySelectorAll('.week'), { autoAlpha: 0, y: 18 }, { autoAlpha: 1, y: 0, stagger: 0.05, duration: 0.45, overwrite: true, clearProps: 'transform,opacity,visibility' });
       }
-      window.scrollTo({ top: panel.getBoundingClientRect().top + window.pageYOffset - 84, behavior: motionOK() ? 'smooth' : 'auto' });
+      window.scrollTo({ top: panel.getBoundingClientRect().top + window.pageYOffset - 92, behavior: motionOK() ? 'smooth' : 'auto' });
     }
+
+    var nWrong = wrongIds().length;
+    var nextVids = VIDEOS.map(function (v, i) { return i + 1; }).filter(function (n) { var st = videoState(n); return !st || st.cls !== 'is-done'; });
+    if (!nextVids.length) nextVids = [1, 2, 3];
+    var side = h('aside', { class: 'home-side' }, [
+      h('section', { class: 'side-card', 'aria-labelledby': 'mix-title' }, [
+        h('h2', { id: 'mix-title' }, [h('span', { class: 'ico', 'aria-hidden': 'true', text: '⤮' }), 'Đề tổng hợp ngẫu nhiên']),
+        h('p', { text: 'Tự chọn số câu và các tuần muốn ôn; câu hỏi được lấy ngẫu nhiên.' }),
+        h('a', { class: 'btn btn--primary btn--block', href: '#/start/mix', text: '⚡ Tạo đề ngay' })
+      ]),
+      h('section', { class: 'side-card', 'aria-labelledby': 'wrong-title' }, [
+        h('h2', { id: 'wrong-title' }, [h('span', { class: 'ico ico--red', 'aria-hidden': 'true', text: '!' }), 'Câu làm sai',
+          h('span', { class: 'count-pill' + (nWrong ? '' : ' is-zero'), text: nWrong + ' câu' })]),
+        h('p', { text: nWrong
+          ? 'Ôn lại những câu đã trả lời sai. Trả lời đúng thì câu tự rời khỏi danh sách.'
+          : 'Chưa có câu sai nào. Câu bạn trả lời sai sẽ tự được lưu vào đây.' }),
+        h('div', { class: 'actions' }, [
+          h('a', { class: 'btn btn--soft', href: '#/wrong', text: 'Xem lại' }),
+          nWrong ? h('a', { class: 'btn btn--danger', href: '#/start/wrong', text: 'Luyện lại' }) : null
+        ])
+      ]),
+      h('section', { class: 'side-card', 'aria-labelledby': 'vid-title' }, [
+        h('div', { class: 'side-card__head' }, [h('h2', { id: 'vid-title', text: 'Video ôn tập' }), h('a', { href: '#/videos', text: 'Tất cả' })]),
+        h('ol', { class: 'playlist' }, nextVids.slice(0, 3).map(function (n) {
+          var v = VIDEOS[n - 1], st = videoState(n);
+          return h('li', null, [h('a', { href: '#/video/' + n, class: st ? st.cls : null }, [
+            h('img', { src: VIDEO_BASE + 'thumbs/v' + n + '.png', alt: '', loading: 'lazy', width: '96', height: '54' }),
+            h('span', null, [h('b', { text: v.title }), h('small', { text: fmtTime(v.dur) + (st ? ' · ' + st.text : '') })])
+          ])]);
+        }))
+      ])
+    ]);
 
     render([
       hero,
-      h('div', { class: 'section-head' }, [
-        h('h2', { text: 'Mục lục tài liệu' }),
-        h('span', { class: 'muted small', text: 'Chọn một nhóm để hiện các tuần' })
-      ]),
-      h('ul', { class: 'toc' }, cards)
-    ].concat(panels, [
-      extras,
-      h('div', { class: 'section-head', style: 'margin-top:32px' }, [
-        h('h2', { text: 'Video bài giảng' }),
-        h('a', { class: 'btn btn--ghost btn--sm', href: '#/videos', text: 'Xem tất cả →' })
-      ]),
-      vgrid
-    ]));
+      kpis,
+      h('div', { class: 'section-head' }, [h('h2', { text: 'Chuyên đề học tập' }), h('span', { class: 'pill', text: groups.length + ' nhóm nội dung' })]),
+      h('ul', { class: 'toc' }, cards),
+      h('div', { class: 'home-cols' }, [h('div', null, [placeholder].concat(panels)), side])
+    ]);
 
     animate(function () {
       var tl = G.timeline();
       tl.from('.hero .eyebrow, .hero h1, .hero .lead, .hero .actions', { y: 22, autoAlpha: 0, stagger: 0.08, duration: 0.7 })
-        .from('.stat', { y: 18, autoAlpha: 0, scale: 0.96, stagger: 0.06, duration: 0.6 }, '<0.2')
+        .from('.progress-card, .kpi', { y: 18, autoAlpha: 0, scale: 0.96, stagger: 0.06, duration: 0.6 }, '<0.2')
         .from('.meter > span', { scaleX: 0, duration: 1.1, ease: 'power2.out' }, '<0.3');
-      app.querySelectorAll('.stat b[data-count]').forEach(function (el) {
+      app.querySelectorAll('[data-count]').forEach(function (el) {
         tl.add(countUp(el, parseInt(el.getAttribute('data-count'), 10)), 0.35);
       });
-      G.to('.blob--1', { x: -40, y: 30, scale: 1.08, duration: 8, ease: 'sine.inOut', repeat: -1, yoyo: true });
-      G.to('.blob--2', { x: 50, y: -24, duration: 9, ease: 'sine.inOut', repeat: -1, yoyo: true });
-      G.to('.blob--3', { x: 30, y: -20, scale: 1.15, duration: 7, ease: 'sine.inOut', repeat: -1, yoyo: true });
       G.from('.section-head', { y: 14, autoAlpha: 0, delay: 0.3 });
     });
-    revealOnScroll(Array.prototype.slice.call(app.querySelectorAll('.toc-panel:not([hidden]) .week, .mix, .vcard')));
+    revealOnScroll(Array.prototype.slice.call(app.querySelectorAll('.toc-panel:not([hidden]) .week, .side-card')));
   }
 
   // Nhóm tài liệu ở trang chủ: học phần chính (Tuần 1–7), các bộ có w.tag (vd. XD), mỗi học phần riêng (w.section).
   var GROUP_INFO = {
-    main: { id: 'tin', icon: '📘', name: 'Tin học GDPT 2018 · Tuần 1–7', desc: 'Phân tích chương trình và xây dựng kế hoạch dạy học môn Tin học' },
-    'tag:XD': { id: 'xd', icon: '📗', name: 'Tổng hợp XD', desc: 'Câu hỏi tổng hợp của các nhóm, theo tuần' },
-    'sec:Lập trình Android': { id: 'android', icon: '📱', name: 'Lập trình Android', desc: 'Học phần riêng · câu hỏi từ các bài kiểm tra Android' }
+    main: { id: 'tin', icon: '📘', tag: 'Tuần 1–7', name: 'Tin học tuần 1–7', desc: 'Phân tích chương trình và xây dựng kế hoạch dạy học môn Tin học' },
+    'tag:XD': { id: 'xd', icon: '📗', tag: 'Chuyên đề XD', name: 'Tổng hợp XD', desc: 'Câu hỏi tổng hợp của các nhóm, theo tuần 3–7' },
+    'sec:Lập trình Android': { id: 'android', icon: '📱', tag: 'Học phần riêng', name: 'Lập trình Android', desc: 'Giao diện, ListView, Adapter, AlertDialog và ứng dụng quản lý công việc' }
   };
   function groupKey(w) { return w.section ? 'sec:' + w.section : w.tag ? 'tag:' + w.tag : 'main'; }
   function homeGroups() {
@@ -461,8 +459,8 @@
       var k = groupKey(w);
       var g = out.filter(function (x) { return x.key === k; })[0];
       if (!g) {
-        var info = GROUP_INFO[k] || { id: 'g' + out.length, icon: '📚', name: w.section || w.tag, desc: '' };
-        g = { key: k, id: info.id, icon: info.icon, name: info.name, desc: info.desc, weeks: [] };
+        var info = GROUP_INFO[k] || { id: 'g' + out.length, icon: '📚', tag: '', name: w.section || w.tag, desc: '' };
+        g = { key: k, id: info.id, icon: info.icon, tag: info.tag, name: info.name, desc: info.desc, weeks: [] };
         out.push(g);
       }
       g.weeks.push(w);
@@ -728,7 +726,7 @@
       h('span', { class: 'spacer' }),
       isLast
         ? h('button', { type: 'button', class: 'btn btn--primary', onclick: submit, text: 'Nộp bài' })
-        : h('button', { type: 'button', class: 'btn btn--primary', onclick: function () { go(quiz.idx + 1); }, text: 'Câu tiếp →' })
+        : h('button', { type: 'button', class: 'btn btn--primary', onclick: function () { go(quiz.idx + 1); }, text: 'Câu tiếp theo →' })
     ]);
 
     var grid = h('div', { class: 'grid', role: 'navigation', 'aria-label': 'Chuyển nhanh tới câu' });
@@ -745,36 +743,44 @@
       }));
     });
 
+    var nOk = quiz.items.filter(function (x) { return x.chosen !== null && x.chosen === x.q.answer; }).length;
+    function sideStat(label, n, mod) { return h('div', { class: 'side-stat' + (mod ? ' side-stat--' + mod : '') }, [label, h('b', { text: String(n) })]); }
     render([
-      h('div', { class: 'quiz-head' }, [
+      h('div', { class: 'quiz-bar' }, [
         h('h1', { text: quiz.set.title }),
-        h('a', { class: 'btn btn--ghost btn--sm', href: '#/', text: 'Thoát' })
-      ]),
-      h('div', { class: 'progress', role: 'progressbar', 'aria-valuemin': '0', 'aria-valuemax': String(total), 'aria-valuenow': String(done), 'aria-label': 'Đã trả lời' }, [
-        h('span', { style: 'transform:scaleX(' + (done / total) + ')' })
+        h('span', { class: 'pill pill--pink', text: practice ? 'Luyện tập' : 'Thi thử' }),
+        h('div', { class: 'quiz-bar__prog' }, [
+          h('span', { text: done + '/' + total + ' câu (' + Math.round(done / total * 100) + '%)' }),
+          h('div', { class: 'progress', role: 'progressbar', 'aria-valuemin': '0', 'aria-valuemax': String(total), 'aria-valuenow': String(done), 'aria-label': 'Đã trả lời' }, [
+            h('span', { style: 'transform:scaleX(' + (done / total) + ')' })
+          ])
+        ]),
+        h('a', { class: 'btn btn--ghost btn--sm', href: '#/', text: '⎋ Thoát' })
       ]),
       h('div', { class: 'quiz-layout' }, [
         h('div', null, [
           h('section', { class: 'qcard', 'aria-labelledby': 'qtext' }, [
-            h('div', { class: 'qmeta' }, [
-              h('span', { class: 'qnum', text: 'Câu ' + (quiz.idx + 1) + '/' + total }),
+            h('div', { class: 'qhead' }, [
+              h('span', { class: 'qbig', text: 'Câu ' + (quiz.idx + 1) }),
               levelTag(q.level),
-              h('span', { text: '· ' + sourcesText(q) })
+              h('span', { class: 'qsrc', text: sourcesText(q) })
             ]),
             h('p', { class: 'qtext', id: 'qtext', text: q.q }),
             codeEl(q),
             opts,
             feedback,
             reveal ? explainEl(q) : null,
-            reveal && q.note ? h('div', { class: 'note', text: q.note }) : null
+            reveal && q.note ? h('div', { class: 'note', text: q.note }) : null,
+            nav
           ]),
-          nav,
           h('p', { class: 'kbd-hint', html: 'Phím tắt: <kbd>1</kbd>–<kbd>4</kbd> hoặc <kbd>A</kbd>–<kbd>D</kbd> để chọn, <kbd>←</kbd> <kbd>→</kbd> để chuyển câu.' })
         ]),
         h('aside', { class: 'side', 'aria-label': 'Danh sách câu' }, [
-          h('h2', { text: 'Đã trả lời ' + done + '/' + total }),
+          h('div', { class: 'side-stats' }, practice
+            ? [sideStat('Đúng', nOk, 'ok'), sideStat('Sai', done - nOk, 'bad'), sideStat('Còn lại', total - done)]
+            : [sideStat('Đã làm', done, 'ok'), sideStat('Còn lại', total - done)]),
           grid,
-          h('button', { type: 'button', class: 'btn btn--primary', onclick: submit, text: 'Nộp bài' })
+          h('button', { type: 'button', class: 'btn btn--primary', onclick: submit, text: '✓ Nộp bài' })
         ])
       ])
     ], anim === 'enter');
@@ -878,15 +884,22 @@
         var q = it.q;
         var posOf = function (orig) { return LETTERS[it.order.indexOf(orig)]; };
         list.appendChild(h('li', { class: 'review-item is-' + status }, [
-          h('div', { class: 'qmeta' }, [h('span', { class: 'qnum', text: 'Câu ' + (i + 1) }), levelTag(q.level), h('span', { text: '· ' + sourcesText(q) })]),
-          h('p', { class: 'qtext', style: 'margin-bottom:8px', text: q.q }),
-          codeEl(q),
-          status !== 'correct'
-            ? h('p', { class: 'review-ans ans-bad' }, [h('b', { text: '✗ Bạn chọn: ' }), it.chosen === null ? '(bỏ trống)' : posOf(it.chosen) + '. ' + q.options[it.chosen]])
-            : null,
-          h('p', { class: 'review-ans ans-ok' }, [h('b', { text: '✓ Đáp án đúng: ' }), posOf(q.answer) + '. ' + q.options[q.answer]]),
-          explainEl(q),
-          q.note ? h('div', { class: 'note', text: q.note }) : null
+          h('div', { class: 'review-q' }, [
+            h('span', { class: 'review-n', text: pad2(i + 1) }),
+            h('p', { class: 'qtext', text: q.q }),
+            h('span', { class: 'pill ' + (status === 'correct' ? 'pill--green' : status === 'wrong' ? 'pill--red' : 'pill--purple'),
+              text: status === 'correct' ? 'Đúng' : status === 'wrong' ? 'Chưa đúng' : 'Bỏ trống' })
+          ]),
+          h('div', { class: 'review-body' }, [
+            h('div', { class: 'qmeta' }, [levelTag(q.level), h('span', { text: sourcesText(q) })]),
+            codeEl(q),
+            h('div', { class: 'ans-grid' }, [
+              status !== 'correct' ? h('div', { class: 'ans-box ans-box--bad' }, [h('small', { text: '✗ Bạn chọn' }), it.chosen === null ? '(bỏ trống)' : posOf(it.chosen) + '. ' + q.options[it.chosen]]) : null,
+              h('div', { class: 'ans-box ans-box--ok' }, [h('small', { text: '✓ Đáp án đúng' }), posOf(q.answer) + '. ' + q.options[q.answer]])
+            ]),
+            explainEl(q),
+            q.note ? h('div', { class: 'note', text: q.note }) : null
+          ])
         ]));
       });
       if (!list.children.length) list.appendChild(h('li', { class: 'empty', text: 'Không có câu sai nào. Rất tốt! ✿' }));
@@ -906,38 +919,44 @@
     chips.appendChild(chip('all', 'Tất cả (' + r.total + ')'));
 
     var again = quiz.set;
-    var ringNum = h('b', { text: String(r.correct) });
     var ring = h('div', { class: 'ring', style: '--p:' + pct, role: 'img', 'aria-label': 'Đúng ' + r.correct + ' trên ' + r.total + ' câu' }, [
-      h('div', null, [h('div', null, [ringNum, h('span', { text: '/' + r.total + ' · ' + pct + '%' })])])
+      h('div', null, [h('div', null, [h('b', { text: (r.correct / r.total * 10).toFixed(1) }), h('span', { text: '/ 10 điểm' })])])
     ]);
+    function retryMiss() { retryPool = { ids: missIds.slice(), from: quiz.set.title }; location.hash = '#/start/retry'; }
+    function tile(label, n, mod) { return h('div', { class: 'tile tile--' + mod }, [h('b', { text: pad2(n) }), label]); }
     var burst = h('div', { class: 'burst', 'aria-hidden': 'true' });
     render([
-      h('a', { class: 'back', href: '#/', text: '← Các tuần' }),
-      h('h1', { text: 'Kết quả · ' + quiz.set.title }),
-      h('div', { class: 'panel panel--accent' }, [
+      h('span', { class: 'eyebrow', text: quiz.set.title }),
+      h('h1', { text: 'Kết quả làm bài 🎉' }),
+      h('div', { class: 'panel result-card' }, [
         h('div', { class: 'result-top' }, [
           burst,
           ring,
           h('div', { class: 'result-text' }, [
-            h('p', { class: 'verdict', text: pct >= 80 ? 'Nắm bài rất tốt! ✿' : pct >= 50 ? 'Khá ổn, ôn lại các câu sai nhé.' : 'Cần ôn thêm phần này.' }),
-            h('p', { class: 'muted small', style: 'margin:0 0 14px', text: 'Đúng ' + r.correct + ' · Sai ' + (r.total - r.correct - skipped) + ' · Bỏ trống ' + skipped }),
-            h('div', { class: 'actions' }, [
-              missIds.length ? h('button', { type: 'button', class: 'btn btn--primary', onclick: function () {
-                retryPool = { ids: missIds.slice(), from: quiz.set.title };
-                location.hash = '#/start/retry';
-              }, text: 'Làm lại ' + missIds.length + ' câu sai' }) : null,
-              h('button', { type: 'button', class: 'btn', onclick: function () {
-                if (again.kind === 'mix' || again.kind === 'wrong') { location.hash = '#/start/' + again.kind; return; }
-                startQuiz(again, quiz.prefs);
-              }, text: again.kind === 'mix' || again.kind === 'wrong' ? 'Tạo đề mới' : 'Làm lại đề này' }),
-              h('a', { class: 'btn btn--ghost', href: '#/wrong', text: 'Sổ câu sai' })
-            ])
-          ])
+            h('p', { class: 'verdict', text: pct >= 80 ? 'Xuất sắc, bạn nắm bài rất chắc! ⭐' : pct >= 50 ? 'Khá ổn, ôn lại các câu sai nhé!' : 'Cần ôn thêm phần này nhé.' }),
+            h('p', { class: 'muted small', style: 'margin:0', text: 'Bạn trả lời đúng ' + r.correct + '/' + r.total + ' câu' + (missIds.length ? '. Luyện lại ' + missIds.length + ' câu chưa đúng để gom trọn điểm nhé!' : '.') })
+          ]),
+          h('div', { class: 'result-tiles' }, [tile('Đúng', r.correct, 'ok'), tile('Sai', r.total - r.correct - skipped, 'bad'), tile('Bỏ qua', skipped, 'skip')])
+        ]),
+        h('div', { class: 'result-actions' }, [
+          missIds.length ? h('button', { type: 'button', class: 'btn btn--primary', onclick: retryMiss, text: '↻ Làm lại ' + missIds.length + ' câu sai' }) : null,
+          h('button', { type: 'button', class: 'btn btn--soft', onclick: function () {
+            if (again.kind === 'mix' || again.kind === 'wrong') { location.hash = '#/start/' + again.kind; return; }
+            startQuiz(again, quiz.prefs);
+          }, text: again.kind === 'mix' || again.kind === 'wrong' ? 'Tạo đề mới' : '↻ Làm lại cả đề' }),
+          h('a', { class: 'btn btn--ghost', href: '#/wrong', text: 'Sổ câu sai' }),
+          h('button', { type: 'button', class: 'btn btn--ghost push', onclick: function () { window.print(); }, text: '⎙ In kết quả' })
         ])
       ]),
-      h('h2', { style: 'margin-top:28px', text: 'Xem lại' }),
-      chips,
-      list
+      h('div', { class: 'section-head', style: 'margin-top:32px' }, [
+        h('h2', null, ['Chi tiết các câu cần lưu ý ', h('span', { class: 'pill pill--red', text: missIds.length + ' câu' })]),
+        chips
+      ]),
+      list,
+      h('div', { class: 'result-foot' }, [
+        h('a', { class: 'back', href: '#/', text: '← Quay lại danh sách đề ôn tập' }),
+        missIds.length ? h('button', { type: 'button', class: 'btn btn--primary', onclick: retryMiss, text: 'Luyện lại câu sai ngay →' }) : null
+      ])
     ]);
     drawList();
 
@@ -945,7 +964,6 @@
       var tl = G.timeline();
       tl.from('.panel', { y: 24, autoAlpha: 0, duration: 0.55 })
         .fromTo(ring, { '--p': 0 }, { '--p': pct, duration: 1.3, ease: 'power2.out' }, '<0.15')
-        .add(countUp(ringNum, r.correct, 1.3), '<')
         .from('.result-text > *', { x: 16, autoAlpha: 0, stagger: 0.08, duration: 0.45 }, '<0.2');
       if (pct >= 80) {
         var colors = ['#ff7aa8', '#c2306b', '#ffc2a8', '#f7a8c4', '#ffd1e1'];
@@ -1061,25 +1079,29 @@
     setTitle('Câu sai của bạn'); setNav('wrong');
     var filter = '';
     var list = h('ol', { class: 'bank-list' });
-    var head = h('div', { class: 'wrong-head panel panel--accent' });
+    var head = h('div', { class: 'page-head' });
+    var sort = 'n';
+    var sortSel = h('select', { class: 'sort-select', 'aria-label': 'Sắp xếp câu sai' }, [
+      h('option', { value: 'n', text: '⇅ Sai nhiều nhất' }), h('option', { value: 't', text: '⇅ Mới sai gần đây' })
+    ]);
+    sortSel.addEventListener('change', function () { sort = sortSel.value; drawList(); });
     var chips = h('div', { class: 'filter-row', role: 'group', 'aria-label': 'Lọc theo tuần' });
 
     function drawHead() {
       var all = wrongIds();
       head.innerHTML = '';
-      head.appendChild(h('div', null, [
-        h('p', { class: 'big-num' }, [h('b', { text: String(all.length) }), ' câu đang cần ôn lại']),
-        h('p', { class: 'muted small', style: 'margin:0', text: all.length
-          ? 'Mỗi câu trả lời sai sẽ được lưu ở đây (trên trình duyệt này). Làm lại mà trả lời đúng thì câu đó tự được gỡ khỏi danh sách.'
-          : 'Chưa có câu sai nào. Hãy làm một đề — câu nào trả lời sai sẽ tự xuất hiện ở đây.' })
-      ]));
+      head.appendChild(h('h1', { text: 'Sổ câu sai' }));
+      head.appendChild(h('span', { class: 'pill pill--pink', text: '♥ ' + all.length + ' câu' }));
       head.appendChild(h('div', { class: 'actions' }, all.length ? [
-        h('a', { class: 'btn btn--primary', href: '#/start/wrong', text: 'Làm lại câu sai…' }),
-        h('button', { type: 'button', class: 'btn btn--ghost', onclick: function () {
+        h('button', { type: 'button', class: 'btn btn--sm', onclick: function () {
           if (!window.confirm('Xoá toàn bộ ' + all.length + ' câu khỏi danh sách câu sai?')) return;
           store.wrong = {}; saveStore(store); updateNavCount(); drawAll();
-        }, text: 'Xoá danh sách' })
-      ] : [h('a', { class: 'btn btn--primary', href: '#/', text: 'Chọn đề để làm' })]));
+        }, text: '🗑 Xoá tất cả' }),
+        h('a', { class: 'btn btn--primary btn--sm', href: '#/start/wrong', text: '▶ Làm lại câu sai' })
+      ] : [h('a', { class: 'btn btn--primary btn--sm', href: '#/', text: 'Chọn đề để làm' })]));
+      head.appendChild(h('p', { class: 'muted small page-head__note', text: all.length
+        ? 'Câu trả lời sai tự được lưu ở đây. Làm lại mà trả lời đúng thì câu đó tự rời khỏi danh sách.'
+        : 'Chưa có câu sai nào. Hãy làm một đề — câu nào trả lời sai sẽ tự xuất hiện ở đây.' }));
     }
     function drawChips() {
       chips.innerHTML = '';
@@ -1088,7 +1110,7 @@
       var opts = [{ id: '', label: 'Tất cả (' + all.length + ')' }];
       DATA.weeks.forEach(function (w) {
         var n = wrongIds([w.id]).length;
-        if (n) opts.push({ id: w.id, label: w.label + ' (' + n + ')' });
+        if (n) opts.push({ id: w.id, label: (w.tag || 'Tuần') + ' ' + (w.short || weekNum(w)) + ' (' + n + ')' });
       });
       if (filter && !opts.some(function (o) { return o.id === filter; })) filter = '';
       opts.forEach(function (o) {
@@ -1099,21 +1121,28 @@
     function drawList() {
       list.innerHTML = '';
       var ids = wrongIds(filter ? [filter] : null);
-      ids.sort(function (a, b) { return (store.wrong[b].n - store.wrong[a].n) || (store.wrong[b].t - store.wrong[a].t); });
-      ids.forEach(function (id) {
+      ids.sort(function (a, b) {
+        var x = store.wrong[a], y = store.wrong[b];
+        return sort === 't' ? y.t - x.t : (y.n - x.n) || (y.t - x.t);
+      });
+      ids.forEach(function (id, k) {
         var q = byId[id];
         var rec = store.wrong[id];
-        var ol = h('ol');
+        // Có rec.c (phương án chọn sai gần nhất) thì chỉ hiện đáp án đúng + phương án đã chọn; dữ liệu cũ không có thì hiện cả 4.
+        var known = typeof rec.c === 'number' && rec.c !== q.answer && rec.c < q.options.length;
+        var ol = h('ol', { class: 'wopts' });
         q.options.forEach(function (o, i) {
-          ol.appendChild(h('li', { class: i === q.answer ? 'is-answer' : '' }, [
-            h('b', { text: LETTERS[i] + '.' }), h('span', { text: o }),
-            i === q.answer ? h('span', { class: 'sr-only', text: ' (đáp án đúng)' }) : null
+          var ok = i === q.answer, bad = known && i === rec.c;
+          if (known && !ok && !bad) return;
+          ol.appendChild(h('li', { class: 'wopt' + (ok ? ' wopt--ok' : bad ? ' wopt--bad' : '') }, [
+            h('span', { class: 'wopt__key', text: LETTERS[i] }),
+            h('span', null, [o, ok ? h('small', { text: '✓ Đáp án đúng' }) : bad ? h('small', { text: '✗ Bạn đã chọn' }) : null])
           ]));
         });
-        var item = h('li', { class: 'bank-item review-item is-wrong' }, [
-          h('div', { class: 'qmeta' }, [
-            h('span', { class: 'qnum', text: weekById[q.week].label }), levelTag(q.level),
-            h('span', { class: 'miss-count', text: 'Sai ' + rec.n + ' lần' }),
+        var item = h('li', { class: 'review-item wcard' }, [
+          h('div', { class: 'qmeta wmeta' }, [
+            weekPill(weekById[q.week]), levelTag(q.level),
+            h('span', { class: 'pill pill--red', text: '⚠ Sai ' + rec.n + ' lần' }),
             h('span', { class: 'spacer' }),
             h('button', { type: 'button', class: 'btn btn--ghost btn--sm', onclick: function () {
               delete store.wrong[id]; saveStore(store); updateNavCount();
@@ -1131,7 +1160,7 @@
               } else finish();
             }, text: '✓ Đã thuộc' })
           ]),
-          h('p', { class: 'qtext', style: 'margin:0', text: q.q }),
+          h('p', { class: 'qtext wq' }, [h('b', { text: pad2(k + 1) + '. ' }), q.q]),
           codeEl(q),
           ol,
           explainEl(q),
@@ -1145,16 +1174,13 @@
     function drawAll() { drawHead(); drawChips(); drawList(); }
 
     render([
-      h('span', { class: 'eyebrow', text: '✿ Ôn lại chỗ còn yếu' }),
-      h('h1', { text: 'Câu sai của bạn' }),
       head,
-      chips,
+      h('div', { class: 'wrong-tools' }, [chips, sortSel]),
       list
     ]);
     drawAll();
     animate(function () {
-      G.from('.eyebrow, h1, .wrong-head', { y: 16, autoAlpha: 0, stagger: 0.07 });
-      G.from('.big-num b', { scale: 0.6, duration: 0.6, ease: 'back.out(2.5)', delay: 0.2 });
+      G.from('.page-head > *', { y: 16, autoAlpha: 0, stagger: 0.07 });
     });
   }
 
@@ -1263,13 +1289,7 @@
               h('h2', { id: 'vq-title', text: 'Ôn trắc nghiệm ' + w.label }),
               h('p', { class: 'muted small', style: 'margin:0', text: w.title + ' · ' + w.count + ' câu' })
             ]),
-            h('div', { class: 'week__tests' }, w.tests.map(function (ids, i) {
-              var key = testKey(w.id, i + 1);
-              return h('a', { class: 'test-btn' + (store.best[key] ? ' is-done' : ''), href: '#/start/' + w.id + '/' + (i + 1) }, [
-                h('span', { class: 'test-btn__top' }, ['Đề ' + (i + 1), bestBadge(key)]),
-                h('small', { text: ids.length + ' câu' })
-              ]);
-            }))
+            h('div', { class: 'week__tests' }, w.tests.map(function (_, i) { return testBtn(w, i); }))
           ])
         ]),
         h('aside', { class: 'side', 'aria-label': 'Danh sách video' }, [h('h2', { text: 'Danh sách video' }), playlist])
