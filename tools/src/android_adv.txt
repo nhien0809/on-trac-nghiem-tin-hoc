@@ -1,0 +1,351 @@
+# Bộ câu "Lập trình Android nâng cao" — soạn thêm dựa trên nội dung 4 tuần Lập trình Android.
+# Định dạng: "## Đề N | chủ đề"; "Câu k [NB|TH|VD] đề"; dòng thụt 4 dấu cách = code; "+" đáp án đúng; "-" phương án sai; "=" giải thích.
+
+## Đề 1 | Giao diện, View và xử lý sự kiện
+Câu 1 [NB] Nên dùng đơn vị nào cho cỡ chữ (textSize) để chữ co giãn theo cài đặt cỡ chữ của người dùng?
++ sp
+- dp
+- px
+- pt
+= sp co giãn theo cả mật độ màn hình lẫn cỡ chữ người dùng chọn trong cài đặt, nên dùng cho chữ. dp dùng cho kích thước và khoảng cách; px phụ thuộc mật độ điểm ảnh nên hiển thị không đồng đều giữa các máy.
+
+Câu 2 [NB] Giá trị nào của layout_width làm View rộng bằng View cha?
++ match_parent
+- wrap_content
+- fill_content
+- parent_width
+= match_parent lấp đầy kích thước View cha; wrap_content chỉ vừa đủ nội dung. fill_content và parent_width không phải giá trị hợp lệ.
+
+Câu 3 [TH] Phát biểu nào đúng về gravity và layout_gravity?
++ gravity căn nội dung bên trong View; layout_gravity căn chính View đó trong View cha
+- gravity căn View trong View cha; layout_gravity căn nội dung bên trong View
+- Hai thuộc tính giống hệt nhau, dùng cái nào cũng được
+- layout_gravity chỉ dùng được cho TextView
+= gravity tác động lên nội dung (ví dụ chữ trong Button nằm giữa), còn layout_gravity là yêu cầu gửi lên View cha (thường là LinearLayout) để đặt View ở vị trí nào.
+
+Câu 4 [VD] Với đoạn layout dưới đây, nút thứ nhất chiếm bao nhiêu chiều ngang của LinearLayout?
+    <LinearLayout android:orientation="horizontal" ...>
+        <Button android:layout_width="0dp" android:layout_weight="2" ... />
+        <Button android:layout_width="0dp" android:layout_weight="1" ... />
+    </LinearLayout>
++ 2/3
+- 1/3
+- 1/2
+- Toàn bộ chiều ngang
+= Khi width = 0dp, phần chiều ngang được chia theo tỉ lệ weight: 2 / (2 + 1) = 2/3 cho nút thứ nhất, 1/3 cho nút thứ hai.
+
+Câu 5 [TH] Câu lệnh nào lấy đúng chuỗi người dùng đã nhập vào EditText edtTen?
++ edtTen.getText().toString()
+- edtTen.getString()
+- edtTen.text()
+- edtTen.getValue()
+= getText() trả về đối tượng Editable, cần gọi toString() để có String. Các phương thức còn lại không có trong EditText.
+
+Câu 6 [VD] Trước khi thêm công việc mới, cần kiểm tra ô nhập edt có bỏ trống không (kể cả khi chỉ gõ dấu cách). Điều kiện nào đúng?
++ edt.getText().toString().trim().isEmpty()
+- edt.getText() == ""
+- edt.length() == null
+- edt.isEmpty()
+= trim() bỏ khoảng trắng hai đầu rồi isEmpty() kiểm tra chuỗi rỗng. So sánh getText() == "" là so tham chiếu đối tượng nên luôn sai; length() trả về số nguyên, không so với null được.
+
+Câu 7 [NB] Phương thức nào gắn file giao diện activity_main.xml cho Activity?
++ setContentView(R.layout.activity_main)
+- setLayout(R.layout.activity_main)
+- inflateView(R.layout.activity_main)
+- loadLayout(R.layout.activity_main)
+= setContentView() được gọi trong onCreate() để hiển thị layout cho Activity. Các tên còn lại không phải phương thức của Activity.
+
+Câu 8 [TH] Trường hợp nào khiến findViewById(R.id.btnThem) trả về null?
++ Gọi trước setContentView() hoặc id đó không có trong layout đang dùng
+- Button đang có visibility = gone
+- Id được đặt tên bằng chữ thường
+- Activity chưa tạo menu
+= findViewById tìm trong cây View của layout đã gắn. Chưa gắn layout, hoặc id thuộc layout khác, thì không tìm thấy. View bị gone vẫn tồn tại trong cây nên vẫn tìm được.
+
+Câu 9 [NB] Giá trị visibility nào làm View biến mất và không chiếm chỗ trên giao diện?
++ gone
+- invisible
+- hidden
+- none
+= gone ẩn View và giải phóng chỗ của nó. invisible chỉ làm View trong suốt nhưng vẫn giữ khoảng trống; hidden và none không phải giá trị của Android.
+
+Câu 10 [TH] Với một RadioGroup, phương thức nào cho biết RadioButton nào đang được chọn?
++ getCheckedRadioButtonId()
+- getSelectedId()
+- isChecked()
+- getCheckedItem()
+= RadioGroup trả về id của nút đang chọn qua getCheckedRadioButtonId() (bằng -1 nếu chưa chọn). isChecked() là của từng RadioButton/CheckBox riêng lẻ.
+
+Câu 11 [VD] Bấm nút trong đoạn code sau nhưng không thấy thông báo hiện ra. Nguyên nhân là gì?
+    Button btn = findViewById(R.id.btnThem);
+    btn.setOnClickListener(v -> {
+        Toast.makeText(this, "Đã thêm", Toast.LENGTH_SHORT);
+    });
++ Thiếu lời gọi .show() sau Toast.makeText(...)
+- Toast.LENGTH_SHORT không hợp lệ
+- Không được dùng biểu thức lambda cho setOnClickListener
+- this không phải là Context
+= makeText() chỉ tạo đối tượng Toast; phải gọi show() thì thông báo mới hiển thị. Lambda và LENGTH_SHORT đều hợp lệ.
+
+Câu 12 [TH] Trong ConstraintLayout, điều gì giúp View không bị dồn về góc trên bên trái khi chạy ứng dụng?
++ Mỗi View có ít nhất một ràng buộc theo chiều ngang và một ràng buộc theo chiều dọc
+- Đặt layout_weight cho từng View
+- Đặt android:gravity="center" cho ConstraintLayout
+- Đặt android:orientation="vertical"
+= ConstraintLayout xác định vị trí View bằng ràng buộc. Thiếu ràng buộc theo trục nào thì View về toạ độ 0 trên trục đó. weight và orientation là thuộc tính của LinearLayout.
+
+Câu 13 [NB] Activity nào được mở đầu tiên khi chạy ứng dụng được khai báo ở đâu?
++ Trong AndroidManifest.xml, với intent-filter MAIN và LAUNCHER
+- Trong build.gradle
+- Trong res/values/strings.xml
+- Android luôn tự mở MainActivity, không cần khai báo
+= AndroidManifest.xml khai báo các thành phần của ứng dụng; Activity có intent-filter action MAIN và category LAUNCHER là màn hình khởi động.
+
+Câu 14 [TH] Lợi ích chính của việc dùng @string/ten_nut thay vì gõ chữ trực tiếp trong layout là gì?
++ Sửa chữ tập trung một chỗ và dễ dịch ứng dụng sang ngôn ngữ khác
+- Ứng dụng chạy nhanh hơn rõ rệt
+- Android bắt buộc, gõ chữ trực tiếp sẽ lỗi biên dịch
+- Giảm dung lượng hình ảnh của ứng dụng
+= Chuỗi trong strings.xml được quản lý tập trung và có thể có bản dịch theo ngôn ngữ (values-en…). Gõ trực tiếp vẫn chạy được, chỉ bị cảnh báo.
+
+Câu 15 [VD] Màn hình đăng ký có CheckBox cbDocSach cho sở thích đọc sách. Câu lệnh nào kiểm tra người dùng có tích chọn ô này không?
++ cbDocSach.isChecked()
+- cbDocSach.getChecked
+- cbDocSach.getText()
+- cbDocSach.isSelectedItem()
+= isChecked() trả về true khi CheckBox được tích. getText() chỉ lấy nhãn chữ của ô; hai tên còn lại không tồn tại.
+
+## Đề 2 | ListView và Adapter nâng cao
+Câu 1 [NB] Phương thức nào của Adapter cho ListView biết có bao nhiêu dòng cần hiển thị?
++ getCount()
+- size()
+- getLength()
+- countItems()
+= ListView hỏi Adapter số phần tử qua getCount(); thường trả về kích thước danh sách dữ liệu.
+
+Câu 2 [TH] Sau khi xoá một phần tử khỏi ArrayList đang gắn với Adapter, cần gọi gì để ListView hiển thị lại?
++ adapter.notifyDataSetChanged()
+- listView.refresh()
+- adapter.reload()
+- Gọi lại setContentView()
+= notifyDataSetChanged() báo cho ListView rằng dữ liệu đã đổi để vẽ lại các dòng. ListView và Adapter không có refresh() hay reload().
+
+Câu 3 [TH] Trong onItemClick(parent, view, position, id), tham số position cho biết gì?
++ Vị trí của dòng được bấm trong Adapter, tính từ 0
+- Số lần người dùng đã bấm vào dòng
+- Id tài nguyên của View dòng
+- Tổng số dòng của ListView
+= position là chỉ số của phần tử trong Adapter (bắt đầu từ 0), dùng để lấy dữ liệu tương ứng, ví dụ ds.get(position).
+
+Câu 4 [VD] Với đoạn code sau, khi gọi ad.add("Sử") thì điều gì xảy ra?
+    String[] mon = {"Toán", "Văn", "Anh"};
+    ArrayAdapter<String> ad = new ArrayAdapter<>(this,
+            android.R.layout.simple_list_item_1, mon);
+    lv.setAdapter(ad);
++ Ứng dụng lỗi UnsupportedOperationException vì danh sách tạo từ mảng có kích thước cố định
+- ListView có thêm dòng "Sử" ở cuối
+- Dòng cuối "Anh" bị thay bằng "Sử"
+- Không có gì thay đổi và không báo lỗi
+= ArrayAdapter tạo từ mảng dùng danh sách bọc mảng, không thêm/xoá được phần tử. Muốn thêm hoặc xoá, hãy truyền vào một ArrayList.
+
+Câu 5 [TH] Mẫu ViewHolder trong Custom Adapter dùng để làm gì?
++ Lưu tham chiếu tới các View con của dòng để không phải gọi findViewById mỗi lần getView chạy
+- Lưu danh sách dữ liệu thay cho ArrayList
+- Thay thế Adapter khi dữ liệu thay đổi
+- Tạo hiệu ứng khi cuộn danh sách
+= getView được gọi liên tục khi cuộn. ViewHolder giữ sẵn các View đã tìm (gắn qua setTag), nhờ vậy danh sách cuộn mượt hơn.
+
+Câu 6 [VD] Hàm getView dưới đây có nhược điểm gì khi danh sách dài?
+    public View getView(int position, View convertView, ViewGroup parent) {
+        View v = LayoutInflater.from(context)
+                .inflate(R.layout.item_sv, parent, false);
+        // ... gán dữ liệu cho v
+        return v;
+    }
++ Luôn inflate View mới mà không dùng lại convertView, gây chậm và tốn bộ nhớ
+- Không hiển thị được dòng nào
+- Lỗi biên dịch vì tham số false
+- Chỉ hiển thị được dòng đầu tiên
+= Đoạn code vẫn chạy đúng nhưng mỗi lần cuộn đều tạo View mới. Nên kiểm tra convertView: khác null thì dùng lại, chỉ inflate khi bằng null.
+
+Câu 7 [TH] Trong inflate(R.layout.item, parent, false), tham số thứ ba false có ý nghĩa gì?
++ Dùng parent để tính thông số bố cục nhưng không gắn View vào parent ngay; ListView sẽ tự gắn
+- View sẽ không bao giờ được hiển thị
+- Tắt chức năng cuộn của ListView
+- Xoá các View cũ trong parent
+= Với Adapter, ListView tự quản lý việc gắn dòng nên phải truyền false. Truyền true sẽ gây lỗi vì View bị gắn hai lần.
+
+Câu 8 [NB] Khi tự viết Adapter linh hoạt nhất cho ListView (tự quản lý dữ liệu), ta thường kế thừa lớp nào?
++ BaseAdapter
+- Activity
+- ViewGroup
+- AlertDialog
+= BaseAdapter là lớp cơ sở cho Adapter tuỳ biến. ArrayAdapter cũng kế thừa từ BaseAdapter và dùng được khi dữ liệu là mảng hoặc danh sách.
+
+Câu 9 [TH] Kế thừa BaseAdapter thì phải override những phương thức nào?
++ getCount(), getItem(), getItemId(), getView()
+- onCreate(), onStart(), onResume(), onDestroy()
+- add(), remove(), clear(), sort()
+- setTitle(), setMessage(), show(), dismiss()
+= Bốn phương thức này là phần trừu tượng của BaseAdapter: số dòng, phần tử tại vị trí, id dòng và View hiển thị dòng. Nhóm onCreate… là vòng đời Activity; nhóm setTitle… thuộc AlertDialog.
+
+Câu 10 [VD] Trong setOnItemLongClickListener, trả về true có ý nghĩa gì?
++ Sự kiện nhấn giữ đã được xử lý, không kích hoạt thêm sự kiện bấm thường
+- Dòng được bấm sẽ tự bị xoá
+- Bật chế độ chọn nhiều dòng
+- Huỷ sự kiện nhấn giữ
+= Giá trị trả về báo hệ thống sự kiện đã được dùng hay chưa. Trả về false thì sau khi nhả tay, sự kiện bấm thường (onItemClick) có thể chạy thêm.
+
+Câu 11 [VD] Nhấn giữ một dòng thì dữ liệu đã bị xoá nhưng dòng vẫn còn trên màn hình. Cần sửa gì?
+    lv.setOnItemLongClickListener((parent, view, position, id) -> {
+        ds.remove(position);
+        return true;
+    });
++ Gọi adapter.notifyDataSetChanged() sau khi xoá
+- Đổi ds.remove(position) thành ds.remove(id)
+- Đổi return true thành return false
+- ListView không hỗ trợ xoá dòng, phải tạo lại Activity
+= Xoá trong ArrayList chưa làm ListView vẽ lại; cần báo cho Adapter bằng notifyDataSetChanged().
+
+Câu 12 [TH] Muốn mỗi dòng hiển thị cả ảnh, tên và giá sản phẩm thì cần gì?
++ Một file layout riêng cho dòng và một Custom Adapter gán dữ liệu vào layout đó
+- Dùng layout có sẵn android.R.layout.simple_list_item_1
+- Dùng ba ListView đặt cạnh nhau
+- Đổi ListView thành Spinner
+= simple_list_item_1 chỉ có một TextView. Dòng nhiều thành phần cần layout riêng và Adapter tự viết (override getView) để gán từng thông tin.
+
+Câu 13 [NB] Đối tượng nào chuyển file layout XML thành đối tượng View trong code?
++ LayoutInflater
+- findViewById
+- Intent
+- Bundle
+= LayoutInflater đọc XML và tạo cây View (inflate). findViewById chỉ tìm View đã có; Intent và Bundle dùng để chuyển màn hình và truyền dữ liệu.
+
+Câu 14 [VD] Dùng ArrayAdapter<MayTinh> với simple_list_item_1 mà lớp MayTinh không override phương thức nào. Mỗi dòng sẽ hiển thị gì?
++ Kết quả toString() mặc định, dạng tên lớp kèm mã băm (ví dụ MayTinh@1a2b3c)
+- Tên máy tính
+- Lỗi biên dịch
+- Dòng trống
+= ArrayAdapter mặc định gọi toString() của phần tử để đặt vào TextView. Muốn hiện tên thì override toString() hoặc viết Custom Adapter.
+
+Câu 15 [TH] Trong Adapter, getItem(position) trả về gì?
++ Phần tử dữ liệu tại vị trí position
+- View của dòng tại vị trí position
+- Tổng số dòng
+- Id của file layout dòng
+= getItem trả về đối tượng dữ liệu (ví dụ ds.get(position)); View của dòng do getView trả về.
+
+## Đề 3 | AlertDialog, Menu, tìm kiếm và ứng dụng To-do
+Câu 1 [NB] Phương thức nào của AlertDialog.Builder hiển thị danh sách cho chọn đúng một mục (có nút tròn)?
++ setSingleChoiceItems()
+- setMultiChoiceItems()
+- setMessage()
+- setTitle()
+= setSingleChoiceItems hiện danh sách nút chọn một. setMultiChoiceItems cho chọn nhiều bằng ô đánh dấu; setMessage và setTitle chỉ đặt chữ.
+
+Câu 2 [NB] setMultiChoiceItems() trong AlertDialog được dùng khi nào?
++ Cho người dùng chọn nhiều mục cùng lúc bằng ô đánh dấu
+- Chỉ cho chọn đúng một mục
+- Hiển thị nhiều dòng thông báo
+- Thêm nhiều nút bấm ở cuối hộp thoại
+= Mỗi mục có một ô đánh dấu và trạng thái chọn được trả về qua listener, phù hợp khi chọn nhiều thứ cùng lúc.
+
+Câu 3 [TH] Gọi builder.setCancelable(false) thì hộp thoại sẽ thế nào?
++ Không đóng được bằng nút Back hay chạm ra ngoài; phải bấm nút trong hộp thoại
+- Không thể hiển thị
+- Tự đóng sau vài giây
+- Mất hết các nút bấm
+= Mặc định hộp thoại đóng khi bấm Back hoặc chạm ra ngoài. setCancelable(false) bắt người dùng chọn một nút, hợp với hộp thoại xác nhận.
+
+Câu 4 [VD] Hộp thoại sửa công việc cần một ô nhập riêng. Cách làm đúng là gì?
++ Inflate layout riêng thành View, gọi builder.setView(view) và lấy ô nhập bằng view.findViewById(...)
+- Gọi findViewById(R.id.edtSua) của Activity rồi setView
+- Dùng setMessage() để người dùng gõ vào
+- Thêm EditText vào activity_main.xml là đủ
+= Ô nhập thuộc layout của hộp thoại, nên phải tìm trong View vừa inflate. findViewById của Activity chỉ tìm trong layout màn hình chính và sẽ trả về null.
+
+Câu 5 [TH] Muốn thêm nút thứ ba kiểu "Để sau" bên cạnh OK và Huỷ, dùng phương thức nào?
++ setNeutralButton()
+- setPositiveButton()
+- setNegativeButton()
+- setCancelButton()
+= AlertDialog có ba vị trí nút: Positive (đồng ý), Negative (huỷ) và Neutral (trung tính). setCancelButton không tồn tại.
+
+Câu 6 [NB] File XML định nghĩa menu được đặt trong thư mục nào?
++ res/menu
+- res/layout
+- res/values
+- res/drawable
+= Menu là một loại tài nguyên riêng, đặt trong res/menu và nạp bằng getMenuInflater().inflate(R.menu.ten_menu, menu).
+
+Câu 7 [TH] Trong onCreateOptionsMenu, vì sao thường return true?
++ Để menu được hiển thị; trả về false thì menu không hiện
+- Để menu tự xử lý khi chọn mục
+- Để xoá menu cũ
+- Không có tác dụng gì
+= Giá trị true cho hệ thống biết hãy hiển thị menu vừa tạo. Xử lý khi chọn mục nằm ở onOptionsItemSelected.
+
+Câu 8 [VD] Khi người dùng chọn mục "Xoá hết" (mnuXoaHet) trong đoạn code sau, kết quả là gì?
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() == R.id.mnuXoaHet) {
+            ds.clear();
+            adapter.notifyDataSetChanged();
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
++ Toàn bộ công việc bị xoá và ListView trở nên trống
+- Chỉ xoá công việc đầu tiên
+- Ứng dụng lỗi vì clear() không dùng được với ArrayList
+- Menu biến mất nhưng danh sách giữ nguyên
+= clear() xoá mọi phần tử, notifyDataSetChanged() cập nhật ListView. return true báo mục menu đã được xử lý.
+
+Câu 9 [TH] Thuộc tính app:showAsAction="ifRoom" của một mục menu có ý nghĩa gì?
++ Hiện mục trên thanh tác vụ nếu còn chỗ, nếu không thì đưa vào menu tràn (dấu ⋮)
+- Luôn ẩn mục trong menu tràn
+- Chỉ hiện khi xoay ngang màn hình
+- Hiện mục ở giữa màn hình
+= ifRoom để hệ thống tự quyết định theo chỗ trống; always luôn hiện và never luôn đưa vào menu tràn.
+
+Câu 10 [TH] Muốn danh sách lọc ngay khi người dùng gõ từng ký tự vào SearchView, xử lý trong hàm nào?
++ onQueryTextChange()
+- onQueryTextSubmit()
+- onCreateOptionsMenu()
+- onItemClick()
+= onQueryTextChange chạy mỗi khi nội dung ô tìm kiếm thay đổi; onQueryTextSubmit chỉ chạy khi người dùng nhấn tìm hoặc Enter.
+
+Câu 11 [VD] ListView dùng ArrayAdapter<String> adapter. Trong onQueryTextChange(String newText), câu lệnh nào lọc danh sách theo từ khoá?
++ adapter.getFilter().filter(newText);
+- adapter.search(newText);
+- listView.filter(newText);
+- ds.find(newText);
+= ArrayAdapter có sẵn bộ lọc trả về qua getFilter(); filter() lọc các phần tử chứa từ khoá rồi tự cập nhật ListView.
+
+Câu 12 [VD] Ứng dụng To-do lưu công việc trong một ArrayList của Activity. Tắt hẳn ứng dụng rồi mở lại thì danh sách trống. Vì sao?
++ ArrayList chỉ nằm trong bộ nhớ khi ứng dụng chạy; cần lưu bền như SharedPreferences, SQLite hoặc file
+- ListView tự xoá dữ liệu khi đóng ứng dụng
+- Adapter bị lỗi nên không hiển thị
+- AlertDialog đã xoá dữ liệu
+= Biến trong Activity mất khi tiến trình kết thúc. Muốn giữ dữ liệu giữa các lần mở phải ghi ra bộ nhớ lâu dài.
+
+Câu 13 [TH] Thứ tự hợp lý khi xử lý nút "Thêm" công việc là gì?
++ Đọc EditText → kiểm tra rỗng → ds.add(...) → notifyDataSetChanged() → xoá trắng EditText
+- ds.add(...) → đọc EditText → notifyDataSetChanged() → kiểm tra rỗng
+- notifyDataSetChanged() → đọc EditText → ds.add(...)
+- Kiểm tra rỗng → notifyDataSetChanged() → ds.add(...) → đọc EditText
+= Phải có dữ liệu hợp lệ trước khi thêm, và chỉ báo Adapter sau khi danh sách đã đổi. Xoá trắng ô nhập giúp người dùng gõ công việc tiếp theo.
+
+Câu 14 [NB] Muốn tự đóng một hộp thoại AlertDialog đang hiển thị bằng code, gọi phương thức nào?
++ dismiss()
+- close()
+- finish()
+- stop()
+= dismiss() đóng hộp thoại. finish() đóng cả Activity; close() và stop() không phải phương thức của AlertDialog.
+
+Câu 15 [VD] Muốn người dùng xác nhận trước khi xoá một công việc, cách làm phù hợp nhất là gì?
++ Hiện AlertDialog có nút "Xoá" (xoá phần tử và cập nhật Adapter) và nút "Huỷ" (chỉ đóng hộp thoại)
+- Xoá ngay rồi hiện Toast "Đã xoá"
+- Hiện Toast hỏi "Bạn có chắc không?"
+- Mở một Activity mới để hỏi
+= Toast không có nút nên không hỏi được. AlertDialog với hai nút Positive/Negative là cách xác nhận gọn và quen thuộc trên Android.

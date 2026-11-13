@@ -417,7 +417,8 @@
   var GROUP_INFO = {
     main: { id: 'tin', icon: '📘', tag: 'Tuần 1–7', name: 'Xây dựng kế hoạch dạy học', desc: 'Phân tích chương trình và xây dựng kế hoạch dạy học môn Tin học' },
     'tag:XD': { id: 'xd', icon: '📗', tag: 'Chuyên đề XD', name: 'Xây dựng kế hoạch dạy học (Tiếng Anh)', desc: 'Câu hỏi tổng hợp của các nhóm, theo tuần 3–7' },
-    'sec:Lập trình Android': { id: 'android', icon: '📱', tag: 'Học phần riêng', name: 'Lập trình Android', desc: 'Giao diện, ListView, Adapter, AlertDialog và ứng dụng quản lý công việc' }
+    'sec:Lập trình Android': { id: 'android', icon: '📱', tag: 'Học phần riêng', name: 'Lập trình Android', desc: 'Giao diện, ListView, Adapter, AlertDialog và ứng dụng quản lý công việc' },
+    'sec:Lập trình Android nâng cao': { id: 'android-adv', icon: '🚀', tag: 'Nâng cao', name: 'Lập trình Android nâng cao', desc: 'Đề luyện thêm: View, Adapter tuỳ biến, AlertDialog, Menu, tìm kiếm và ứng dụng To-do' }
   };
   function groupKey(w) { return w.section ? 'sec:' + w.section : w.tag ? 'tag:' + w.tag : 'main'; }
   function homeGroups() {
@@ -1676,8 +1677,27 @@
   }
 
   // ---------- router ----------
+  // Chỉ người đã đăng nhập mới được học/xem tài liệu.
+  // shortcut: chỉ chặn ở giao diện — file data/*.js vẫn tải công khai; muốn chặn thật phải chuyển câu hỏi vào Firestore có rules.
+  function pageGate() {
+    setTitle('Đăng nhập để học'); setNav('');
+    var waiting = !cloudFailed && !Cloud.isReady();
+    if (!waiting && !cloudFailed && !/^#\/(login)?$/.test(location.hash)) afterLogin = location.hash;
+    render([h('div', { class: 'auth-card panel' }, [
+      h('span', { class: 'eyebrow', text: '🔒 Dành cho thành viên' }),
+      h('h1', { text: waiting ? 'Đang kiểm tra đăng nhập…' : 'Đăng nhập để học' }),
+      waiting ? null : h('p', { class: 'muted', text: cloudFailed
+        ? 'Không tải được chức năng đăng nhập (mạng chặn hoặc mất kết nối). Hãy tải lại trang.'
+        : 'Bạn cần đăng nhập (Google hoặc email) để làm đề, xem ngân hàng câu hỏi và video. Tiến độ sẽ được lưu vào tài khoản của bạn.' }),
+      waiting ? null : h('div', { class: 'actions' }, [cloudFailed
+        ? h('button', { type: 'button', class: 'btn btn--primary', onclick: function () { location.reload(); }, text: 'Tải lại trang' })
+        : h('a', { class: 'btn btn--primary', href: '#/login', text: 'Đăng nhập / Tạo tài khoản' })])
+    ])]);
+  }
+
   function route() {
     var parts = (location.hash.replace(/^#\/?/, '') || '').split('/');
+    if (Cloud && parts[0] !== 'login' && (cloudFailed || !Cloud.isReady() || !Cloud.user())) return pageGate();
     switch (parts[0]) {
       case '': return pageHome();
       case 'start': return pageStart(parts[1], parts[2]);
@@ -1700,10 +1720,11 @@
     Cloud.onUser(onUser);
     // Firebase không tải được: ẩn nút tài khoản; dữ liệu vẫn lưu trên máy như trước.
     Cloud.ready.then(function (ok) {
-      if (ok) return;
-      cloudFailed = true;
-      if (accountBox) accountBox.hidden = true;
-      if (/^#\/login/.test(location.hash)) route();
+      if (!ok) {
+        cloudFailed = true;
+        if (accountBox) accountBox.hidden = true;
+      }
+      route(); // vẽ lại sau khi biết trạng thái đăng nhập (màn chờ -> trang thật hoặc màn yêu cầu đăng nhập)
     });
   }
 })();
