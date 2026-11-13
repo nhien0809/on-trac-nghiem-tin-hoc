@@ -415,8 +415,8 @@
 
   // Nhóm tài liệu ở trang chủ: học phần chính (Tuần 1–7), các bộ có w.tag (vd. XD), mỗi học phần riêng (w.section).
   var GROUP_INFO = {
-    main: { id: 'tin', icon: '📘', tag: 'Tuần 1–7', name: 'Tin học tuần 1–7', desc: 'Phân tích chương trình và xây dựng kế hoạch dạy học môn Tin học' },
-    'tag:XD': { id: 'xd', icon: '📗', tag: 'Chuyên đề XD', name: 'Tổng hợp XD', desc: 'Câu hỏi tổng hợp của các nhóm, theo tuần 3–7' },
+    main: { id: 'tin', icon: '📘', tag: 'Tuần 1–7', name: 'Xây dựng kế hoạch dạy học', desc: 'Phân tích chương trình và xây dựng kế hoạch dạy học môn Tin học' },
+    'tag:XD': { id: 'xd', icon: '📗', tag: 'Chuyên đề XD', name: 'Xây dựng kế hoạch dạy học (Tiếng Anh)', desc: 'Câu hỏi tổng hợp của các nhóm, theo tuần 3–7' },
     'sec:Lập trình Android': { id: 'android', icon: '📱', tag: 'Học phần riêng', name: 'Lập trình Android', desc: 'Giao diện, ListView, Adapter, AlertDialog và ứng dụng quản lý công việc' }
   };
   function groupKey(w) { return w.section ? 'sec:' + w.section : w.tag ? 'tag:' + w.tag : 'main'; }
