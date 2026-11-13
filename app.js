@@ -63,6 +63,8 @@
   var weekById = {};
   DATA.weeks.forEach(function (w) { weekById[w.id] = w; });
   var TOTAL_TESTS = DATA.weeks.reduce(function (s, w) { return s + w.tests.length; }, 0);
+  // Các học phần khác ngoài học phần chính, theo thứ tự xuất hiện (w.section).
+  var SECTIONS = DATA.weeks.reduce(function (a, w) { if (w.section && a.indexOf(w.section) === -1) a.push(w.section); return a; }, []);
 
   // ---------- storage ----------
   // Khách: localStorage[STORE_KEY]. Đã đăng nhập: Firestore users/{uid}, kèm bản sao trên máy
@@ -214,7 +216,14 @@
   function levelTag(level) {
     return level ? h('span', { class: 'tag tag--' + level, text: LEVEL_NAME[level] || level }) : null;
   }
-  function sourcesText(q) { return q.sources && q.sources.length ? 'Nguồn: Nhóm ' + q.sources.join(', ') : 'Nguồn: tài liệu tổng hợp'; }
+  function sourcesText(q) {
+    if (q.sources && q.sources.length) return 'Nguồn: Nhóm ' + q.sources.join(', ');
+    var w = weekById[q.week];
+    return w && w.section ? 'Nguồn: bài kiểm tra ' + w.section : 'Nguồn: tài liệu tổng hợp';
+  }
+
+  // Đoạn code kèm đề (q.code) hiện trong khung chữ đơn cách, giữ nguyên thụt lề.
+  function codeEl(q) { return q.code ? h('pre', { class: 'qcode' }, [h('code', { text: q.code })]) : null; }
 
   // Giải thích tham khảo (data/explanations.js). collapsed = dạng thu gọn (ngân hàng câu hỏi).
   var EXPLAIN = window.QUIZ_EXPLAIN || {};
@@ -268,7 +277,11 @@
         h('div', { class: 'actions' }, [
           h('a', { class: 'btn btn--primary', href: '#/start/' + DATA.weeks[0].id + '/1', text: 'Bắt đầu ' + DATA.weeks[0].label }),
           h('a', { class: 'btn', href: '#/start/mix', text: 'Đề tổng hợp' }),
-          h('a', { class: 'btn btn--ghost', href: '#/videos', text: '▶ Video bài giảng' })
+          h('a', { class: 'btn btn--ghost', href: '#/videos', text: '▶ Video bài giảng' }),
+          SECTIONS.length ? h('button', { type: 'button', class: 'btn btn--ghost', text: '📱 ' + SECTIONS[0], onclick: function () {
+            var el = document.getElementById('sec-1');
+            if (el) window.scrollTo({ top: el.getBoundingClientRect().top + window.pageYOffset - 80, behavior: 'smooth' });
+          } }) : null
         ])
       ]),
       h('div', { class: 'hero-stats' }, [
@@ -288,8 +301,10 @@
       ])
     ]);
 
-    var list = h('ul', { class: 'weeks' });
+    // Tuần thuộc học phần chính (không có w.section) hiện trước; mỗi học phần khác (vd. Lập trình Android) có mục riêng.
+    var lists = [h('ul', { class: 'weeks' })].concat(SECTIONS.map(function () { return h('ul', { class: 'weeks' }); }));
     DATA.weeks.forEach(function (w) {
+      var list = lists[w.section ? SECTIONS.indexOf(w.section) + 1 : 0];
       var c = levelCounts(w.ids);
       var vids = VIDEOS.filter(function (v) { return v.week === w.id; });
       var tests = h('div', { class: 'week__tests' });
@@ -355,14 +370,23 @@
     render([
       hero,
       h('div', { class: 'section-head' }, [h('h2', { text: 'Chọn tuần để ôn' })]),
-      list,
+      lists[0]
+    ].concat(SECTIONS.reduce(function (acc, name, i) {
+      return acc.concat([
+        h('div', { class: 'section-head', id: 'sec-' + (i + 1), style: 'margin-top:32px;scroll-margin-top:80px' }, [
+          h('h2', { text: '📱 ' + name }),
+          h('span', { class: 'muted small', text: 'Học phần riêng · ' + DATA.weeks.filter(function (w) { return w.section === name; }).reduce(function (n, w) { return n + w.count; }, 0) + ' câu' })
+        ]),
+        lists[i + 1]
+      ]);
+    }, []), [
       extras,
       h('div', { class: 'section-head', style: 'margin-top:32px' }, [
         h('h2', { text: 'Video bài giảng' }),
         h('a', { class: 'btn btn--ghost btn--sm', href: '#/videos', text: 'Xem tất cả →' })
       ]),
       vgrid
-    ]);
+    ]));
 
     animate(function () {
       var tl = G.timeline();
@@ -668,6 +692,7 @@
               h('span', { text: '· ' + sourcesText(q) })
             ]),
             h('p', { class: 'qtext', id: 'qtext', text: q.q }),
+            codeEl(q),
             opts,
             feedback,
             reveal ? explainEl(q) : null,
@@ -785,6 +810,7 @@
         list.appendChild(h('li', { class: 'review-item is-' + status }, [
           h('div', { class: 'qmeta' }, [h('span', { class: 'qnum', text: 'Câu ' + (i + 1) }), levelTag(q.level), h('span', { text: '· ' + sourcesText(q) })]),
           h('p', { class: 'qtext', style: 'margin-bottom:8px', text: q.q }),
+          codeEl(q),
           status !== 'correct'
             ? h('p', { class: 'review-ans ans-bad' }, [h('b', { text: '✗ Bạn chọn: ' }), it.chosen === null ? '(bỏ trống)' : posOf(it.chosen) + '. ' + q.options[it.chosen]])
             : null,
@@ -926,6 +952,7 @@
           frag.appendChild(h('li', { class: 'bank-item' }, [
             h('div', { class: 'qmeta' }, [h('span', { class: 'qnum', text: wk.label }), levelTag(q.level), h('span', { text: '· ' + sourcesText(q) })]),
             h('p', { class: 'qtext', style: 'margin:0', html: highlight(q.q, terms) }),
+            codeEl(q),
             ol,
             explainEl(q, true),
             q.note ? h('div', { class: 'note', text: q.note }) : null
@@ -1035,6 +1062,7 @@
             }, text: '✓ Đã thuộc' })
           ]),
           h('p', { class: 'qtext', style: 'margin:0', text: q.q }),
+          codeEl(q),
           ol,
           explainEl(q),
           q.note ? h('div', { class: 'note', text: q.note }) : null

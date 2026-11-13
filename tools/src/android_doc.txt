@@ -1,0 +1,799 @@
+# Câu hỏi trắc nghiệm Lập trình Android, chép từ ảnh chụp bài làm trong 4 file: "Trắc Ngiệm Tuần 1.docx", "Trắc nghiệm tuần 2.docx", "Tuần 3.docx", "Tuần 4.docx".
+# Đáp án lấy theo dấu ✓ / dòng "Đáp án đúng là" trong ảnh. Câu lặp lại giữa các tuần chỉ giữ ở tuần xuất hiện đầu tiên (tools/build_android.py lo việc này).
+
+# Tuan 1
+
+Câu 1. Trong file activity_main.xml, thuộc tính nào quyết định màu chữ của TextView?
+A. textStyle
+B. textSize
+C. textColor
+D. textAlignment
+Answer: C
+
+Câu 2. Hệ điều hành Android được xây dựng dựa trên nền tảng nào?
+A. MacOS
+B. Windows
+C. Linux
+D. Unix
+Answer: C
+
+Câu 3. Trong Android, file activity_main.xml thường nằm ở thư mục nào?
+A. res/layout
+B. res/drawable
+C. res/values
+D. src/main/java
+Answer: A
+
+Câu 4. Trong Android, lớp nào được tạo tự động để quản lý tài nguyên của project?
+A. Context
+B. Intent
+C. R
+D. MainActivity
+Answer: C
+
+Câu 5. Thiết bị nào sau đây KHÔNG được xem là thiết bị di động?
+A. Điện thoại thông minh
+B. Đồng hồ thông minh
+C. Máy tính bảng
+D. Máy tính để bàn
+Answer: D
+
+Câu 6. Trong Android Studio, kết quả chạy ứng dụng sẽ hiển thị ở đâu?
+A. Terminal
+B. Emulator hoặc thiết bị thật
+C. File build.gradle
+D. Logcat
+Answer: B
+
+Câu 7. Trong Android, để ánh xạ một View từ file XML sang MainActivity.java, ta dùng phương thức nào?
+A. getViewById()
+B. mapViewById()
+C. setViewById()
+D. findViewById()
+Answer: D
+
+Câu 8. Trong Android Studio, file nào thường chứa giao diện chính của ứng dụng?
+A. MainActivity.java
+B. activity_main.xml
+C. AndroidManifest.xml
+D. strings.xml
+Answer: B
+
+Câu 9. Trong Android Studio, file build.gradle dùng để làm gì?
+A. Quản lý tài nguyên string
+B. Quản lý giao diện ứng dụng
+C. Quản lý class Java
+D. Quản lý thư viện, cấu hình và quá trình build
+Answer: D
+
+Câu 10. Trong Android Studio, để tạo một project mới ta chọn tùy chọn nào?
+A. Open Existing Project
+B. Create New Project
+C. New → File
+D. Import Module
+Answer: B
+
+Câu 11. Trong Android Studio, file styles.xml dùng để:
+A. Quản lý chuỗi ký tự
+B. Quản lý layout của ứng dụng
+C. Quản lý theme và định dạng giao diện
+D. Quản lý dữ liệu SQLite
+Answer: C
+
+Câu 12. Trong Android, thư mục nào chứa các file mã nguồn Java hoặc Kotlin?
+A. res/values
+B. src/main/java
+C. res/
+D. assets/
+Answer: B
+
+Câu 13. Trong kiến trúc hệ điều hành Android, tầng nào chịu trách nhiệm quản lý CPU và bộ nhớ vật lý?
+A. Application Framework
+B. Android Runtime
+C. Native Libraries
+D. Linux Kernel
+Answer: D
+
+Câu 14. Trong Android Studio, file Gradle Scripts nào định nghĩa cấu hình mức project?
+A. gradle-wrapper.properties
+B. build.gradle (Project)
+C. build.gradle (Module: app)
+D. settings.gradle
+Answer: B
+
+Câu 15. Trong Android, tệp colors.xml dùng để quản lý:
+A. Mã màu sử dụng trong ứng dụng
+B. Các activity
+C. Chuỗi văn bản
+D. Định dạng giao diện
+Answer: A
+
+Câu 16. Khi tạo máy ảo Android (AVD), thành phần nào KHÔNG cần cấu hình?
+A. RAM của máy tính thật
+B. Kiểu thiết bị (Device)
+C. Kích thước màn hình ảo
+D. Phiên bản hệ điều hành (System Image)
+Answer: A
+
+Câu 17. Nền tảng phát triển ứng dụng Native App thường sử dụng ngôn ngữ nào trên Android?
+A. C# và .NET
+B. Java và Kotlin
+C. Python và Ruby
+D. HTML và CSS
+Answer: B
+
+Câu 18. Trong Android, biểu tượng (icon) của ứng dụng được quản lý trong thư mục:
+A. src/main/java
+B. res/layout
+C. res/drawable
+D. res/values
+Answer: C
+
+Câu 19. Thuộc tính nào dùng để điều chỉnh khoảng cách giữa border và nội dung bên trong View?
+A. textAlignment
+B. layout_padding
+C. gravity
+D. layout_margin
+Answer: B
+
+Câu 20. Thuộc tính nào giúp căn lề văn bản trong TextView?
+A. layout_margin
+B. textAlignment
+C. textStyle
+D. textSize
+Answer: B
+
+Câu 21. Trong Android, giá trị số nguyên, kích thước (dp, sp) thường được quản lý trong file nào?
+A. dimens.xml
+B. strings.xml
+C. styles.xml
+D. colors.xml
+Answer: A
+
+Câu 22. Để chạy thử ứng dụng Android trên máy tính, ta cần tạo gì trong Android Studio?
+A. Service
+B. Emulator (máy ảo)
+C. Broadcast Receiver
+D. API
+Answer: B
+
+Câu 23. Trong Android, file nào quản lý cấu hình chính của ứng dụng như tên package, icon, quyền truy cập?
+A. activity_main.xml
+B. R.java
+C. MainActivity.java
+D. AndroidManifest.xml
+Answer: D
+
+Câu 24. Trong Android, giá trị text, màu sắc, định dạng thường được quản lý trong file:
+A. AndroidManifest.xml
+B. activity_main.xml
+C. build.gradle
+D. strings.xml, colors.xml, styles.xml
+Answer: D
+
+Câu 25. Công nghệ nào sau đây thuộc nhóm Cross Platform?
+A. Flutter
+B. Objective-C
+C. Swift
+D. Java
+Answer: A
+
+Câu 26. Trong Android, nếu muốn thay đổi biểu tượng ứng dụng (app icon), cần chỉnh sửa ở thư mục:
+A. res/raw
+B. res/values
+C. res/layout
+D. res/mipmap
+Answer: D
+
+Câu 27. Trong Android, các icon và hình ảnh của ứng dụng thường lưu ở thư mục nào?
+A. res/layout
+B. res/drawable
+C. res/mipmap
+D. res/values
+Answer: B
+
+Câu 28. Hybrid App được xây dựng dựa trên công nghệ nào?
+A. HTML, CSS, JavaScript
+B. C++ và C#
+C. Objective-C và Swift
+D. Java và Kotlin
+Answer: A
+
+Câu 29. Khi khai báo sự kiện Click cho Button trong Android, phương thức nào được sử dụng?
+A. setOnClickListener()
+B. addClickEvent()
+C. onClickListener()
+D. setOnClick()
+Answer: A
+
+Câu 30. Thành phần nào trong Android có khả năng chứa các View khác?
+A. Button
+B. ViewGroup
+C. EditText
+D. Toast
+Answer: B
+
+Câu 31. Phương án nào sau đây là ĐÚNG về TextView?
+A. TextView cho phép nhập dữ liệu văn bản
+B. TextView cho phép hiển thị văn bản trên màn hình
+C. TextView dùng để hiển thị thông điệp ngắn
+D. TextView chỉ dùng để hiển thị hình ảnh
+Answer: B
+
+Câu 32. Trong Android, phương thức nào của EditText cho phép lấy nội dung người dùng nhập vào?
+A. setText()
+B. show()
+C. toString()
+D. getText()
+Answer: D
+
+Câu 33. Phương án nào sau đây là ĐÚNG về CheckBox?
+A. CheckBox chỉ cho phép chọn một lựa chọn duy nhất
+B. CheckBox không thể hiển thị văn bản đi kèm
+C. CheckBox cho phép chọn nhiều lựa chọn cùng lúc
+D. CheckBox chỉ hiển thị được trong GridLayout
+Answer: C
+
+# Tuan 2
+
+Câu 1. Toast.LENGTH_LONG trong Android hiển thị thông điệp trong khoảng thời gian bao lâu?
+A. 3,5 giây
+B. 1 giây
+C. 5 giây
+D. 2 giây
+Answer: A
+
+Câu 2. Thuộc tính nào trong RelativeLayout giúp căn một View con nằm phía dưới một View khác?
+A. android:layout_below
+B. android:layout_alignBottom
+C. android:layout_above
+D. android:layout_toLeftOf
+Answer: A
+
+Câu 3. Trong RelativeLayout, thuộc tính nào giúp căn View con sang bên phải View có ID được chỉ ra?
+A. android:layout_gravityRight
+B. android:layout_toRightOf
+C. android:layout_alignRight
+D. android:alignParentRight
+Answer: B
+
+Câu 4. Trong quá trình khai báo sự kiện Click cho Button, tổ hợp phím nào được nhấn sau khi gõ “new + khoảng trắng”?
+A. Shift + Space
+B. Alt + Enter
+C. Ctrl + Shift
+D. Ctrl + Space
+Answer: D
+
+Câu 5. Phương án nào sau đây là ĐÚNG về ViewGroup trong Android?
+A. ViewGroup có thể chứa nhiều View và cả ViewGroup khác
+B. ViewGroup chỉ chứa được TextView
+C. ViewGroup chỉ sử dụng được trong LinearLayout
+D. ViewGroup không thể lồng nhau
+Answer: A
+
+Câu 6. Thành phần nào cho phép người dùng chọn nhiều lựa chọn cùng lúc?
+A. CheckBox
+B. Button
+C. TextView
+D. RadioButton
+Answer: A
+
+Câu 7. Trong LinearLayout, thuộc tính nào quy định hướng sắp xếp các View con?
+A. android:orientation
+B. android:direction
+C. android:layout_gravity
+D. android:layout_align
+Answer: A
+
+Câu 8. Phương án nào sau đây là SAI về Button?
+A. Button có thể kết hợp với EditText để xử lý dữ liệu
+B. Button hiển thị nút bấm
+C. Button có thể gắn sự kiện onClickListener
+D. Button tự động hiển thị thông báo Toast khi được nhấn
+Answer: D
+
+Câu 9. Phương án nào sau đây là ĐÚNG về View trong Android?
+A. View chỉ là container chứa các View khác
+B. View chỉ được sử dụng trong ConstraintLayout
+C. View là thành phần cơ bản hiển thị nội dung hoặc nhận tương tác
+D. View chỉ dùng để hiển thị văn bản
+Answer: C
+
+Câu 11. Phương án nào sau đây là ĐÚNG về Toast trong Android?
+A. Toast có thời gian hiển thị mặc định là 10 giây
+B. Toast hiển thị thông điệp và tự động đóng sau một khoảng thời gian
+C. Toast chỉ hiển thị được trong RelativeLayout
+D. Toast yêu cầu người dùng nhấn nút mới biến mất
+Answer: B
+
+Câu 12. Trong ứng dụng trắc nghiệm, để người dùng bấm gửi câu trả lời, thành phần nào thường được sử dụng?
+A. CheckBox
+B. TextView
+C. RadioButton
+D. Button
+Answer: D
+
+Câu 13. Phương án nào sau đây là ĐÚNG về ConstraintLayout?
+A. ConstraintLayout không hỗ trợ ràng buộc giữa các View
+B. ConstraintLayout yêu cầu ít nhất một ràng buộc ngang và một ràng buộc dọc
+C. ConstraintLayout không được khuyến khích dùng trong Android Studio
+D. ConstraintLayout chỉ chứa được tối đa 2 View con
+Answer: B
+
+Câu 16. Thuộc tính android:gravity="center_horizontal" trong RelativeLayout có tác dụng gì?
+A. Căn nội dung của View ra phía bên trái
+B. Căn nội dung của View ra giữa theo chiều dọc
+C. Căn nội dung của View ra chính giữa màn hình
+D. Căn nội dung của View ra giữa theo chiều ngang
+Answer: D
+
+Câu 17. Phương án nào sau đây là SAI về Toast?
+A. Toast tự động biến mất sau 2s hoặc 3,5s
+B. Toast hiển thị thông điệp ngắn
+C. Toast có thể được tùy chỉnh nội dung thông điệp
+D. Toast yêu cầu người dùng bấm để đóng
+Answer: D
+
+Câu 18. Trong EditText, thuộc tính nào cho phép hiển thị gợi ý (placeholder) cho người dùng?
+A. text
+B. placeholder
+C. hint
+D. label
+Answer: C
+
+Câu 19. Trong ConstraintLayout, thuộc tính nào để ràng buộc cạnh trên của một View với cạnh dưới của một View khác?
+A. layout_constraintAlignTop
+B. layout_constraintBelow
+C. layout_constraintBottom_toTopOf
+D. layout_constraintTop_toBottomOf
+Answer: D
+
+Câu 20. Phương án nào sau đây là SAI về CheckBox?
+A. CheckBox là một loại View
+B. CheckBox thường dùng trong các câu hỏi nhiều lựa chọn
+C. CheckBox cho phép chọn nhiều đáp án
+D. CheckBox chỉ cho phép chọn duy nhất một đáp án
+Answer: D
+
+Câu 21. Phương án nào sau đây là ĐÚNG về ListView trong Android?
+A. ListView hiển thị dữ liệu theo dạng từng dòng
+B. ListView không thể dùng trong Activity
+C. ListView chỉ hiển thị dữ liệu dạng số nguyên
+D. ListView không cần Adapter
+Answer: A
+
+Câu 22. Phương án nào sau đây là ĐÚNG về AlertDialog trong Android?
+A. AlertDialog dùng để hiển thị thông báo và tương tác với người dùng
+B. AlertDialog chỉ dùng để hiển thị danh sách dữ liệu
+C. AlertDialog thay thế hoàn toàn cho Activity
+D. AlertDialog chỉ hoạt động khi không có Button
+Answer: A
+
+Câu 23. Phương án nào sau đây là ĐÚNG khi người dùng chọn nút “Huỷ” trong AlertDialog?
+A. Một Activity mới được mở
+B. Ứng dụng sẽ thoát hoàn toàn
+C. Một Toast tự động hiển thị
+D. Cửa sổ AlertDialog sẽ đóng lại
+Answer: D
+
+Câu 24. Phương án nào sau đây là ĐÚNG về EditText?
+A. EditText cho phép nhập dữ liệu như chữ, số, ngày tháng
+B. EditText chỉ cho phép nhập số nguyên
+C. EditText không hỗ trợ thuộc tính hint
+D. EditText chỉ sử dụng trong RelativeLayout
+Answer: A
+
+Câu 25. Phương án nào sau đây là ĐÚNG về RadioButton?
+A. RadioButton khi nhóm trong RadioGroup chỉ cho phép chọn một lựa chọn
+B. RadioButton luôn cho phép chọn nhiều lựa chọn cùng lúc
+C. RadioButton không thể dùng trong RelativeLayout
+D. RadioButton chỉ hiển thị hình ảnh
+Answer: A
+
+Câu 26. Phương án nào sau đây là SAI về AlertDialog tuỳ chỉnh?
+A. Có thể ánh xạ các thành phần trong file XML vào Dialog
+B. Có thể dùng EditText trong giao diện Dialog tuỳ chỉnh
+C. Không thể sử dụng Button trong AlertDialog tuỳ chỉnh
+D. Cần một file layout .xml để thiết kế giao diện tuỳ chỉnh
+Answer: C
+
+Câu 27. Phương án nào sau đây là SAI khi khởi tạo AlertDialog một lớp?
+A. Cần xác định sự kiện để hiển thị AlertDialog, ví dụ nhấn nút
+B. Phải khởi tạo đối tượng AlertDialog.Builder
+C. Không cần gọi show() mà AlertDialog vẫn hiển thị được
+D. Có thể thiết lập các thuộc tính như tiêu đề, nội dung và nút
+Answer: C
+
+Câu 28. Trong RelativeLayout, thuộc tính nào căn View con vào giữa View cha?
+A. android:layout_centerInParent
+B. android:layout_centerHorizontal
+C. android:layout_alignParentTop
+D. android:layout_centerVertical
+Answer: A
+
+Câu 29. ConstraintLayout yêu cầu ít nhất bao nhiêu ràng buộc để định vị chính xác một View?
+A. 3
+B. 2
+C. 1
+D. 4
+Answer: B
+
+Câu 90. Thuộc tính nào dùng để điều chỉnh khoảng cách giữa border và nội dung bên trong View?
+A. textAlignment
+B. layout_padding
+C. gravity
+D. layout_margin
+Answer: B
+
+Câu 90. Trong Android, file nào quản lý cấu hình chính của ứng dụng như tên package, icon, quyền truy cập?
+A. activity_main.xml
+B. R.java
+C. MainActivity.java
+D. AndroidManifest.xml
+Answer: D
+
+Câu 90. Khi khai báo sự kiện Click cho Button trong Android, phương thức nào được sử dụng?
+A. setOnClickListener()
+B. addClickEvent()
+C. onClickListener()
+D. setOnClick()
+Answer: A
+
+Câu 90. Thành phần nào trong Android có khả năng chứa các View khác?
+A. Button
+B. ViewGroup
+C. EditText
+D. Toast
+Answer: B
+
+Câu 90. Phương án nào sau đây là ĐÚNG về TextView?
+A. TextView cho phép nhập dữ liệu văn bản
+B. TextView cho phép hiển thị văn bản trên màn hình
+C. TextView dùng để hiển thị thông điệp ngắn
+D. TextView chỉ dùng để hiển thị hình ảnh
+Answer: B
+
+Câu 90. Trong Android, phương thức nào của EditText cho phép lấy nội dung người dùng nhập vào?
+A. setText()
+B. show()
+C. toString()
+D. getText()
+Answer: D
+
+Câu 90. Phương án nào sau đây là ĐÚNG về CheckBox?
+A. CheckBox chỉ cho phép chọn một lựa chọn duy nhất
+B. CheckBox không thể hiển thị văn bản đi kèm
+C. CheckBox cho phép chọn nhiều lựa chọn cùng lúc
+D. CheckBox chỉ hiển thị được trong GridLayout
+Answer: C
+
+# Tuan 3
+
+Câu 90. Phương án nào sau đây là ĐÚNG về ListView trong Android?
+A. ListView hiển thị dữ liệu theo dạng từng dòng
+B. ListView không thể dùng trong Activity
+C. ListView chỉ hiển thị dữ liệu dạng số nguyên
+D. ListView không cần Adapter
+Answer: A
+
+Câu 90. Phương án nào sau đây là ĐÚNG về AlertDialog trong Android?
+A. AlertDialog dùng để hiển thị thông báo và tương tác với người dùng
+B. AlertDialog chỉ dùng để hiển thị danh sách dữ liệu
+C. AlertDialog thay thế hoàn toàn cho Activity
+D. AlertDialog chỉ hoạt động khi không có Button
+Answer: A
+
+Câu 90. Phương án nào sau đây là ĐÚNG khi người dùng chọn nút “Huỷ” trong AlertDialog?
+A. Một Activity mới được mở
+B. Ứng dụng sẽ thoát hoàn toàn
+C. Một Toast tự động hiển thị
+D. Cửa sổ AlertDialog sẽ đóng lại
+Answer: D
+
+Câu 90. Phương án nào sau đây là ĐÚNG về EditText?
+A. EditText cho phép nhập dữ liệu như chữ, số, ngày tháng
+B. EditText chỉ cho phép nhập số nguyên
+C. EditText không hỗ trợ thuộc tính hint
+D. EditText chỉ sử dụng trong RelativeLayout
+Answer: A
+
+Câu 1. Trong ứng dụng nhập phiếu khám bệnh, để chọn nhiều dịch vụ khám bệnh cùng lúc, ta nên dùng thành phần nào?
+A. RadioButton
+B. EditText
+C. CheckBox
+D. Spinner
+Answer: C
+
+Câu 3. Phương án nào sau đây là ĐÚNG khi muốn nâng cấp ListView thành ứng dụng To-do-list?
+A. Cần bổ sung chức năng Thêm/Sửa/Xoá công việc
+B. Không cần bổ sung thêm chức năng nào
+C. Chỉ cần thêm một TextView vào layout
+D. ListView tự động hỗ trợ chỉnh sửa dữ liệu
+Answer: A
+
+Câu 4. Phương án nào sau đây là ĐÚNG khi muốn hiển thị AlertDialog nhiều lớp?
+A. Phải dùng RecyclerView để quản lý
+B. Không thể sử dụng AlertDialog.Builder
+C. Cần lồng thêm các Builder con trong PositiveButton hoặc NegativeButton
+D. Chỉ cần một hàm show() duy nhất
+Answer: C
+
+Câu 5. Trong ví dụ AlertDialog một lớp, khi người dùng nhấn nút OK thì ứng dụng thực hiện hành động gì?
+A. Đóng ứng dụng
+B. Mở Activity mới
+C. Hiển thị thông điệp Toast
+D. Gọi hàm onDestroy()
+Answer: C
+
+Câu 6. Trong LinearLayout, các View con được sắp xếp theo cách nào?
+A. Theo vị trí tuyệt đối
+B. Theo chiều ngang hoặc dọc
+C. Theo mối quan hệ với View cha
+D. Theo tọa độ X, Y
+Answer: B
+
+Câu 7. Trong ứng dụng trắc nghiệm, khi bấm "Xem đáp án", thành phần nào thích hợp để hiển thị thông báo ngắn gọn?
+A. EditText
+B. ImageView
+C. AlertDialog
+D. Toast
+Answer: D
+
+Câu 8. ListView cần đối tượng nào để quản lý và hiển thị dữ liệu?
+A. Adapter
+B. ViewModel
+C. Listener
+D. Handler
+Answer: A
+
+Câu 9. Phương án nào sau đây là SAI về ViewGroup?
+A. ViewGroup là một loại View
+B. ViewGroup có thể chứa cả ViewGroup khác
+C. ViewGroup bao gồm LinearLayout, RelativeLayout, ConstraintLayout
+D. ViewGroup không thể lồng nhau
+Answer: D
+
+Câu 10. Trong AlertDialog, phương thức nào dùng để tạo đối tượng Dialog trước khi hiển thị?
+A. make()
+B. init()
+C. create()
+D. build()
+Answer: C
+
+Câu 11. Phương án nào sau đây là SAI về AlertDialog nhiều lớp?
+A. Quy trình khởi tạo tương tự như AlertDialog một lớp
+B. Không thể tạo thêm nhiều lớp AlertDialog
+C. Cần viết các hàm riêng để quản lý AlertDialog khác nhau
+D. Có thể lồng AlertDialog con trong PositiveButton hoặc NegativeButton
+Answer: B
+
+Câu 12. Trong cửa sổ đăng nhập, để thực hiện hành động "Đăng nhập", ta nên dùng thành phần nào?
+A. Toast
+B. Button
+C. CheckBox
+D. RadioButton
+Answer: B
+
+Câu 13. Phương án nào sau đây là SAI về ArrayAdapter?
+A. Có thể hiển thị dữ liệu từ một mảng hoặc danh sách
+B. Là cầu nối giữa dữ liệu và ListView
+C. Không thể tuỳ chỉnh giao diện hiển thị của từng dòng
+D. Được khởi tạo trong Activity bằng cách truyền vào context, layout và dữ liệu
+Answer: C
+
+Câu 14. Trong Android, thành phần nào là đơn vị cơ bản nhất để xây dựng giao diện người dùng?
+A. ViewGroup
+B. Service
+C. Activity
+D. View
+Answer: D
+
+Câu 15. Phương án nào sau đây là SAI khi xây dựng ứng dụng To-do-list với ListView?
+A. Cần bổ sung chức năng thêm/sửa/xoá công việc
+B. Có thể dùng AlertDialog để xác nhận xoá công việc
+C. Không cần cập nhật Adapter sau khi dữ liệu thay đổi
+D. Cần EditText để nhập công việc và Button để xác nhận
+Answer: C
+
+Câu 16. Phương thức nào được dùng để thiết lập tiêu đề cho AlertDialog?
+A. setPositiveButton()
+B. setMessage()
+C. setIcon()
+D. setTitle()
+Answer: D
+
+Câu 17. Phương án nào sau đây là SAI về ListView?
+A. ListView bắt buộc phải đi kèm một Adapter
+B. ListView không thể dùng trong Activity
+C. ListView có thể kết hợp với ArrayAdapter
+D. ListView hiển thị dữ liệu dạng danh sách theo từng dòng
+Answer: B
+
+Câu 18. Phương án nào sau đây là SAI về View trong Android?
+A. View có thể hiển thị nội dung hoặc nhận tương tác
+B. View chỉ có thể chứa các View khác bên trong
+C. View có thể là TextView, Button, ImageView
+D. View là thành phần cơ bản nhất của giao diện
+Answer: B
+
+Câu 19. Phương án nào sau đây là ĐÚNG về AlertDialog tuỳ chỉnh?
+A. Chỉ sử dụng được trong Fragment
+B. Không thể hiển thị Button trong Dialog
+C. Luôn phải viết code Java mà không cần file XML
+D. Cần tạo layout .xml riêng cho giao diện Dialog
+Answer: D
+
+Câu 20. Phương án nào sau đây là ĐÚNG khi khởi tạo AlertDialog một lớp?
+A. Cần khởi tạo AlertDialog.Builder, thiết lập tiêu đề/nội dung/nút, rồi gọi create() và show()
+B. Phải khởi tạo một Activity mới để hiển thị
+C. Không cần setTitle và setMessage
+D. Chỉ cần gọi show() mà không cần tạo Builder
+Answer: A
+
+Câu 21. Thành phần nào được sử dụng để hiển thị văn bản trên màn hình?
+A. Button
+B. TextView
+C. ImageView
+D. CheckBox
+Answer: B
+
+# Tuan 4
+
+Câu 1. Custom Adapter trong Android có vai trò chính là gì?
+A. Tự động sắp xếp dữ liệu theo thứ tự alphabet, đồng thời hỗ trợ tìm kiếm dữ liệu
+B. Đóng vai trò thay thế hoàn toàn cho ListView
+C. Kết nối dữ liệu với layout và điều khiển cách hiển thị từng item
+D. Lưu trữ dữ liệu trên bộ nhớ trong của thiết bị
+Answer: C
+
+Câu 4. Trong đoạn code dưới đây, mục đích của điều kiện if (convertView == null) là gì?
+    public View getView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
+        if (convertView == null) {
+            LayoutInflater inflater = LayoutInflater.from(getContext());
+            convertView = inflater.inflate(R.layout.maytinh, parent, false);
+        }
+A. Ngăn không cho ListView hiển thị khi chưa có dữ liệu
+B. Đảm bảo chỉ hiển thị một item duy nhất trong ListView
+C. Tái sử dụng View cũ nếu có, tránh việc tạo mới nhiều lần
+D. Xóa bỏ layout cũ trước khi inflate layout mới
+Answer: C
+
+Câu 5. Trong Custom Adapter, phương thức getView() có vai trò gì?
+A. Khởi tạo Activity chứa ListView
+B. Xác định kích thước của ListView được khởi tạo trong xml
+C. Inflate layout và ánh xạ dữ liệu vào item
+D. Tạo menu tùy chọn trong ứng dụng chứa ListView
+Answer: C
+
+Câu 6. Phương án nào sau đây là ĐÚNG khi người dùng nhấn và giữ vào một công việc trong ListView?
+A. Có thể mở cửa sổ AlertDialog để Sửa hoặc Xoá công việc
+B. ListView sẽ tự động xóa dòng đó
+C. Ứng dụng sẽ đóng ngay lập tức
+D. ListView sẽ đổi sang chế độ GridView
+Answer: A
+
+Câu 3. Trong khai báo public class MayTinhAdapter sau đây, từ khoá "extends" có ý nghĩa gì trong các phương án sau đây?
+    public class MayTinhAdapter extends ArrayAdapter<MayTinh> {
+        ArrayList<MayTinh> danhSachMayTinh, danhSachLoc;
+        public MayTinhAdapter(@NonNull Context context, int resource, ArrayList<MayTinh> danhSachMayTinh) {
+            super(context, resource, danhSachMayTinh);
+            this.danhSachMayTinh = new ArrayList<>(danhSachMayTinh);
+            this.danhSachLoc = new ArrayList<>(danhSachMayTinh);
+        }
+A. Kế thừa các thuộc tính và phương thức của lớp ArrayAdapter
+B. Kế thừa các thuộc tính và phương thức của lớp MayTinhAdapter
+C. Thực hiện đa hình bằng cách triển khai nhiều interface
+D. Tạo một đối tượng mới của lớp ArrayAdapter
+Answer: A
+
+Câu 8. Từ khóa nào sau đây được dùng trong phương thức để tham chiếu tới đối tượng hiện tại của lớp?
+A. super
+B. this
+C. return
+D. self
+Answer: B
+
+Câu 9. Phương án nào sau đây là SAI khi khởi tạo ListView cơ bản?
+A. Tạo mảng hoặc danh sách dữ liệu
+B. ListView tự động hiển thị dữ liệu mà không cần Adapter
+C. Tạo đối tượng ListView trong file .xml
+D. Liên kết ListView và dữ liệu bằng ArrayAdapter
+Answer: B
+
+Câu 10. Phương thức nào dùng để hiển thị AlertDialog ra màn hình?
+A. open()
+B. start()
+C. display()
+D. show()
+Answer: D
+
+Câu 11. Trong lập trình chức năng tìm kiếm, sự kiện nào được sử dụng để bắt từ khóa nhập vào?
+A. onSearchResultChanged()
+B. onTextChanged()
+C. onSearchItemSelected()
+D. onQueryTextListener()
+Answer: D
+
+Câu 12. Trong Java, nếu một phương thức không trả về giá trị nào thì ta dùng từ khóa nào?
+A. NaN
+B. void
+C. empty
+D. null
+Answer: B
+
+Câu 13. Phương thức nào cần override để gắn file menu XML vào Activity?
+A. onPrepareOptionsMenu()
+B. onOptionsItemSelected()
+C. onCreateOptionsMenu()
+D. onCreate()
+Answer: C
+
+Câu 14. Phương án nào sau đây là ĐÚNG về ArrayAdapter khi sử dụng với ListView?
+A. ArrayAdapter chỉ quản lý dữ liệu kiểu số nguyên
+B. ArrayAdapter là cầu nối giữa dữ liệu và ListView
+C. ArrayAdapter chỉ hoạt động với RecyclerView
+D. ArrayAdapter không cho phép tùy chỉnh giao diện
+Answer: B
+
+Câu 15. Custom Adapter trong Android thường kế thừa từ lớp nào?
+A. BaseActivity
+B. RecyclerView.Adapter
+C. ListView
+D. ArrayAdapter
+Answer: D
+
+Câu 16. Phương án nào sau đây là SAI về AlertDialog trong Android?
+A. AlertDialog có thể hiển thị giao diện tuỳ chỉnh từ file XML
+B. AlertDialog có thể hiển thị tiêu đề, nội dung và icon
+C. AlertDialog thay thế hoàn toàn cho Activity trong quản lý giao diện
+D. AlertDialog có thể chứa các nút như OK, Cancel
+Answer: C
+
+Câu 17. Trong các bước khởi tạo ListView cơ bản, bước nào là bước đầu tiên?
+A. Tạo ArrayAdapter
+B. Gọi phương thức setAdapter()
+C. Tạo ListView trong file .xml
+D. Khởi tạo dữ liệu mảng
+Answer: C
+
+Câu 18. Phương án nào sau đây là SAI về chức năng “Sửa công việc” trong ứng dụng quản lý công việc?
+A. Sau khi sửa, cần cập nhật lại Adapter
+B. Có thể dùng sự kiện nhấn và giữ để mở AlertDialog
+C. Người dùng có thể chỉnh sửa nội dung công việc
+D. ListView tự động sửa dữ liệu mà không cần lập trình thêm
+Answer: D
+
+Câu 19. Phương án nào sau đây là ĐÚNG khi lập trình chức năng “Thêm công việc” trong ứng dụng quản lý công việc?
+A. Chỉ cần gọi phương thức setMessage() của AlertDialog
+B. Không cần cập nhật Adapter sau khi thêm dữ liệu
+C. Cần dùng EditText để nhập công việc và Button để xác nhận thêm
+D. Chỉ cần khai báo ListView là tự động thêm
+Answer: C
+
+Câu 20. Để hiển thị dữ liệu theo dạng từng dòng, Android cung cấp thành phần nào?
+A. Spinner
+B. GridView
+C. ListView
+D. RecyclerView
+Answer: C
+
+Câu 21. Khi muốn hiển thị biểu tượng (icon) trong AlertDialog, ta sử dụng phương thức nào?
+A. setDrawable()
+B. setImage()
+C. setIcon()
+D. setPicture()
+Answer: C
+
+Câu 22. Khi sử dụng ArrayAdapter, tham số nào bắt buộc phải có để hiển thị dữ liệu trong ListView?
+A. id, layout, button
+B. context, layout, danh sách dữ liệu
+C. context, dialog, message
+D. activity, intent, view
+Answer: B
+
+Câu 23. Phương án nào sau đây là SAI về chức năng “Xoá công việc” trong ứng dụng quản lý công việc?
+A. Có thể hiển thị AlertDialog xác nhận trước khi xoá
+B. Công việc tự động xoá khi nhấn vào bất kỳ TextView nào trong ứng dụng
+C. Sau khi xoá cần cập nhật lại Adapter để danh sách thay đổi
+D. Người dùng nhấn và giữ để chọn công việc cần xoá
+Answer: B

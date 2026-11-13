@@ -235,6 +235,7 @@ legend { font-weight: 700; margin-bottom: 8px; padding: 0; }
   .tag--VD { background: #2d2140; color: #cfb0ff; }
 }
 .qtext { font-size: 1.1rem; font-weight: 600; line-height: 1.55; margin: 0 0 18px; white-space: pre-line; }
+.qcode { margin: -6px 0 18px; padding: 12px 14px; border-radius: 12px; background: var(--primary-soft); border: 1px solid var(--border); overflow-x: auto; font: 500 .86rem/1.55 ui-monospace, SFMono-Regular, Consolas, 'Courier New', monospace; white-space: pre; tab-size: 4; }
 .options { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 10px; }
 .opt {
   width: 100%; text-align: left; display: flex; gap: 12px; align-items: flex-start;
