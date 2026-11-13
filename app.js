@@ -64,7 +64,6 @@
   DATA.weeks.forEach(function (w) { weekById[w.id] = w; });
   var TOTAL_TESTS = DATA.weeks.reduce(function (s, w) { return s + w.tests.length; }, 0);
   // Các học phần khác ngoài học phần chính, theo thứ tự xuất hiện (w.section).
-  var SECTIONS = DATA.weeks.reduce(function (a, w) { if (w.section && a.indexOf(w.section) === -1) a.push(w.section); return a; }, []);
 
   // ---------- storage ----------
   // Khách: localStorage[STORE_KEY]. Đã đăng nhập: Firestore users/{uid}, kèm bản sao trên máy
@@ -277,11 +276,7 @@
         h('div', { class: 'actions' }, [
           h('a', { class: 'btn btn--primary', href: '#/start/' + DATA.weeks[0].id + '/1', text: 'Bắt đầu ' + DATA.weeks[0].label }),
           h('a', { class: 'btn', href: '#/start/mix', text: 'Đề tổng hợp' }),
-          h('a', { class: 'btn btn--ghost', href: '#/videos', text: '▶ Video bài giảng' }),
-          SECTIONS.length ? h('button', { type: 'button', class: 'btn btn--ghost', text: '📱 ' + SECTIONS[0], onclick: function () {
-            var el = document.getElementById('sec-1');
-            if (el) window.scrollTo({ top: el.getBoundingClientRect().top + window.pageYOffset - 80, behavior: 'smooth' });
-          } }) : null
+          h('a', { class: 'btn btn--ghost', href: '#/videos', text: '▶ Video bài giảng' })
         ])
       ]),
       h('div', { class: 'hero-stats' }, [
@@ -301,10 +296,11 @@
       ])
     ]);
 
-    // Tuần thuộc học phần chính (không có w.section) hiện trước; mỗi học phần khác (vd. Lập trình Android) có mục riêng.
-    var lists = [h('ul', { class: 'weeks' })].concat(SECTIONS.map(function () { return h('ul', { class: 'weeks' }); }));
+    // Mục lục: mỗi nhóm tài liệu (Tuần 1–7, Tổng hợp XD, mỗi học phần riêng) là một thẻ; bấm thẻ mới hiện các tuần của nhóm.
+    var groups = homeGroups();
+    var lists = groups.map(function () { return h('ul', { class: 'weeks' }); });
     DATA.weeks.forEach(function (w) {
-      var list = lists[w.section ? SECTIONS.indexOf(w.section) + 1 : 0];
+      var list = lists[groups.indexOf(groupOf(w, groups))];
       var c = levelCounts(w.ids);
       var vids = VIDEOS.filter(function (v) { return v.week === w.id; });
       var tests = h('div', { class: 'week__tests' });
@@ -367,19 +363,67 @@
 
     var vgrid = h('ul', { class: 'vgrid' }, VIDEOS.map(function (v, i) { return videoCard(v, i + 1); }));
 
+    var openId = readOpenGroup();
+    if (!groups.some(function (g) { return g.id === openId; })) openId = null;
+    var cards = [], panels = [];
+    groups.forEach(function (g, i) {
+      var nQ = g.weeks.reduce(function (n, w) { return n + w.count; }, 0);
+      var nT = g.weeks.reduce(function (n, w) { return n + w.tests.length; }, 0);
+      var nDone = g.weeks.reduce(function (n, w) { return n + doneTests(w); }, 0);
+      var open = g.id === openId;
+      cards.push(h('li', null, [h('button', {
+        type: 'button', class: 'toc-card' + (open ? ' is-open' : ''), id: 'toc-' + g.id,
+        'aria-expanded': String(open), 'aria-controls': 'grp-' + g.id,
+        onclick: function () { toggleGroup(g.id); }
+      }, [
+        h('span', { class: 'toc-card__icon', 'aria-hidden': 'true', text: g.icon }),
+        h('span', { class: 'toc-card__body' }, [
+          h('span', { class: 'toc-card__name', text: g.name }),
+          h('span', { class: 'toc-card__desc', text: g.desc }),
+          h('span', { class: 'toc-card__meta', text: nQ + ' câu · ' + nT + ' đề' }),
+          h('span', { class: 'meter toc-card__meter', 'aria-hidden': 'true' }, [h('span', { style: 'transform:scaleX(' + (nT ? nDone / nT : 0) + ')' })]),
+          h('span', { class: 'toc-card__done', text: 'Đã làm ' + nDone + '/' + nT + ' đề' })
+        ]),
+        h('span', { class: 'toc-card__chev', 'aria-hidden': 'true', text: '›' })
+      ])]));
+      var panel = h('section', { class: 'toc-panel', id: 'grp-' + g.id, 'aria-labelledby': 'grp-title-' + g.id }, [
+        h('div', { class: 'section-head' }, [
+          h('h2', { id: 'grp-title-' + g.id, text: g.icon + ' ' + g.name }),
+          h('button', { type: 'button', class: 'btn btn--ghost btn--sm', text: 'Thu gọn ✕', onclick: function () { toggleGroup(g.id); } })
+        ]),
+        lists[i]
+      ]);
+      if (!open) panel.hidden = true;
+      panels.push(panel);
+    });
+
+    function toggleGroup(id) {
+      var next = openId === id ? null : id;
+      openId = next; saveOpenGroup(next);
+      groups.forEach(function (g, i) {
+        var on = g.id === next;
+        var card = document.getElementById('toc-' + g.id);
+        card.classList.toggle('is-open', on);
+        card.setAttribute('aria-expanded', String(on));
+        panels[i].hidden = !on;
+      });
+      if (!next) return;
+      var panel = panels[groups.map(function (g) { return g.id; }).indexOf(next)];
+      var weeks = panel.querySelectorAll('.week');
+      if (motionOK()) {
+        G.fromTo(weeks, { autoAlpha: 0, y: 18 }, { autoAlpha: 1, y: 0, stagger: 0.05, duration: 0.45, overwrite: true, clearProps: 'transform,opacity,visibility' });
+      }
+      window.scrollTo({ top: panel.getBoundingClientRect().top + window.pageYOffset - 84, behavior: motionOK() ? 'smooth' : 'auto' });
+    }
+
     render([
       hero,
-      h('div', { class: 'section-head' }, [h('h2', { text: 'Chọn tuần để ôn' })]),
-      lists[0]
-    ].concat(SECTIONS.reduce(function (acc, name, i) {
-      return acc.concat([
-        h('div', { class: 'section-head', id: 'sec-' + (i + 1), style: 'margin-top:32px;scroll-margin-top:80px' }, [
-          h('h2', { text: '📱 ' + name }),
-          h('span', { class: 'muted small', text: 'Học phần riêng · ' + DATA.weeks.filter(function (w) { return w.section === name; }).reduce(function (n, w) { return n + w.count; }, 0) + ' câu' })
-        ]),
-        lists[i + 1]
-      ]);
-    }, []), [
+      h('div', { class: 'section-head' }, [
+        h('h2', { text: 'Mục lục tài liệu' }),
+        h('span', { class: 'muted small', text: 'Chọn một nhóm để hiện các tuần' })
+      ]),
+      h('ul', { class: 'toc' }, cards)
+    ].concat(panels, [
       extras,
       h('div', { class: 'section-head', style: 'margin-top:32px' }, [
         h('h2', { text: 'Video bài giảng' }),
@@ -401,8 +445,34 @@
       G.to('.blob--3', { x: 30, y: -20, scale: 1.15, duration: 7, ease: 'sine.inOut', repeat: -1, yoyo: true });
       G.from('.section-head', { y: 14, autoAlpha: 0, delay: 0.3 });
     });
-    revealOnScroll(Array.prototype.slice.call(app.querySelectorAll('.week, .mix, .vcard')));
+    revealOnScroll(Array.prototype.slice.call(app.querySelectorAll('.toc-panel:not([hidden]) .week, .mix, .vcard')));
   }
+
+  // Nhóm tài liệu ở trang chủ: học phần chính (Tuần 1–7), các bộ có w.tag (vd. XD), mỗi học phần riêng (w.section).
+  var GROUP_INFO = {
+    main: { id: 'tin', icon: '📘', name: 'Tin học GDPT 2018 · Tuần 1–7', desc: 'Phân tích chương trình và xây dựng kế hoạch dạy học môn Tin học' },
+    'tag:XD': { id: 'xd', icon: '📗', name: 'Tổng hợp XD', desc: 'Câu hỏi tổng hợp của các nhóm, theo tuần' },
+    'sec:Lập trình Android': { id: 'android', icon: '📱', name: 'Lập trình Android', desc: 'Học phần riêng · câu hỏi từ các bài kiểm tra Android' }
+  };
+  function groupKey(w) { return w.section ? 'sec:' + w.section : w.tag ? 'tag:' + w.tag : 'main'; }
+  function homeGroups() {
+    var out = [];
+    DATA.weeks.forEach(function (w) {
+      var k = groupKey(w);
+      var g = out.filter(function (x) { return x.key === k; })[0];
+      if (!g) {
+        var info = GROUP_INFO[k] || { id: 'g' + out.length, icon: '📚', name: w.section || w.tag, desc: '' };
+        g = { key: k, id: info.id, icon: info.icon, name: info.name, desc: info.desc, weeks: [] };
+        out.push(g);
+      }
+      g.weeks.push(w);
+    });
+    return out;
+  }
+  function groupOf(w, groups) { var k = groupKey(w); return groups.filter(function (g) { return g.key === k; })[0]; }
+  // Nhóm đang mở được nhớ trong phiên (quay lại trang chủ sau khi làm đề vẫn thấy nhóm đó).
+  function readOpenGroup() { try { return sessionStorage.getItem('home-group'); } catch (e) { return null; } }
+  function saveOpenGroup(id) { try { if (id) sessionStorage.setItem('home-group', id); else sessionStorage.removeItem('home-group'); } catch (e) {} }
 
   function videoCard(v, n) {
     var st = videoState(n);
